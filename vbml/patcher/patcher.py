@@ -39,7 +39,7 @@ class Patcher:
         check = pattern(text)
 
         if not check:
-            return False
+            return None
 
         keys = pattern.dict()
 

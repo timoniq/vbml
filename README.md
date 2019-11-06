@@ -18,7 +18,7 @@ print(patcher.check(text, pattern))
 # >> {'name': 'vbml', 'age': 0}
 
 print(patcher.check(text2, pattern))
-# >> False
+# >> None
 ```
 
 You can ignore check only pattern, without validator formatting:
