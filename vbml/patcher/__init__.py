@@ -1,1 +1,2 @@
-from .patcher import Pattern
+from .pattern import Pattern
+from .patcher import Patcher
