@@ -11,7 +11,7 @@ from vbml.validators import ValidatorManager, AbstractAsynchronousValidator
 class MyValidator(AbstractAsynchronousValidator):
     key = "int"
 
-    async def check(self, text: str, **kwargs) -> typing.Union[typing.Any, None]:
+    async def check(self, text: str, *args) -> typing.Union[typing.Any, None]:
         if text.isdigit():
             return int(text)
 

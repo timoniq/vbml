@@ -8,7 +8,7 @@ class AbstractValidator(metaclass=abc.ABCMeta):
 
 
 class AbstractSyncValidator(AbstractValidator):
-    def check(self, text: str, **kwargs) -> typing.Union[typing.Any, None]:
+    def check(self, text: str, *args) -> typing.Union[typing.Any, None]:
         ...
 
     def __call__(self, *args, **kwargs):
@@ -16,7 +16,7 @@ class AbstractSyncValidator(AbstractValidator):
 
 
 class AbstractAsynchronousValidator(AbstractValidator):
-    async def check(self, text: str, **kwargs) -> typing.Union[typing.Any, None]:
+    async def check(self, text: str, *args) -> typing.Union[typing.Any, None]:
         ...
 
     async def __call__(self, *args, **kwargs):
