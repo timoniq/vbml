@@ -12,8 +12,7 @@ class MyValidator(AbstractAsynchronousValidator):
     key = "int"
 
     async def check(self, text: str, **kwargs) -> typing.Union[typing.Any, None]:
-        valid = text.isdigit()
-        if valid:
+        if text.isdigit():
             return int(text)
 
 

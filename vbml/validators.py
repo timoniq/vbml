@@ -1,6 +1,6 @@
 import abc
 import typing
-from vbml.utils import ContextInstanceMixin
+from .utils import ContextInstanceMixin
 
 
 class AbstractValidator(metaclass=abc.ABCMeta):
@@ -29,10 +29,11 @@ AnyValidator = typing.TypeVar(
 
 
 class ValidatorManager(ContextInstanceMixin):
-    def __init__(self, validators: typing.List[AnyValidator] = None):
+    def __init__(self, validators: typing.Union[typing.List[AnyValidator], AnyValidator] = None):
         if validators is None:
             validators: typing.List[AnyValidator] = []
         self._validators: dict = {}
+        validators = validators if isinstance(validators, list) else [validators]
         for validator in validators:
             self.add_validator(validator)
 
