@@ -2,7 +2,7 @@ from .pattern import Pattern
 from inspect import iscoroutinefunction
 from typing import Optional
 import asyncio
-from vbml.validators import ValidatorManager
+from ..validators import ValidatorManager
 
 
 class Patcher:
