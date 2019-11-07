@@ -1,41 +1,39 @@
 from .pattern import Pattern
-from .exceptions import ValidationError
-from inspect import getmembers, ismethod, iscoroutinefunction
-from ..validators import standart
-from typing import Optional, ClassVar, Callable
-from asyncio import AbstractEventLoop, get_event_loop
-
-
-def get_validators_from_class(validators, validators_kwargs: dict = None) -> dict:
-    members_tuple = getmembers(
-        validators(**validators_kwargs if validators_kwargs else {}),
-        predicate=ismethod,
-    )
-    return dict((x, y) for x, y in members_tuple if not x.startswith("__"))
-
-
-async def coroutine_independency(func: Callable, args: tuple = None, kwargs: dict = None):
-    if iscoroutinefunction(func):
-        return await func(*(args or ()), **(kwargs or {}))
-    return func(*(args or ()), **(kwargs or {}))
+from inspect import iscoroutinefunction
+from typing import Optional
+import asyncio
+from vbml.validators import ValidatorManager
 
 
 class Patcher:
-    def __init__(self, validators: ClassVar = None, disable_validators: bool = False, **context):
-        self.__validators = get_validators_from_class(validators or standart.VBMLValidators, context)
+    def __init__(
+        self, disable_validators: bool = False, manager: ValidatorManager = None
+    ):
         self.disable_validators = disable_validators
         self.prefix = []
-        self.loop: AbstractEventLoop = context.get("loop", get_event_loop())
+        self.manager = manager or ValidatorManager.get_current()
+        if self.manager is None:
+            raise RuntimeError("Configure `ValidatorManager` for work with Patcher.")
 
     def pattern(self, text: str, **context):
         return Pattern(text, prefix=self.prefix, **context)
 
+    async def check_async(
+        self, text: str, pattern: Pattern, ignore_features: bool = False
+    ):
+        if ignore_features:
+            return pattern(text)
+        return await self._check(text, pattern)
+
     def check(self, text: str, pattern: Pattern, ignore_features: bool = False):
         if ignore_features:
             return pattern(text)
-        return self.__check_validators__(text, pattern)
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            raise RuntimeError("Please `check_async` when loop is running.")
+        return loop.run_until_complete(self._check(text, pattern))
 
-    def __check_validators__(self, text: str, pattern: Pattern):
+    async def _check(self, text: str, pattern: Pattern):
         check = pattern(text)
 
         if not check:
@@ -52,15 +50,12 @@ class Patcher:
             if key in pattern.validation:
                 for validator in pattern.validation[key]:
 
-                    if validator not in self.__validators:
-                        raise ValidationError(f"Validator <:{validator}> is undefined!")
-
-                    valid = self.loop.run_until_complete(
-                        coroutine_independency(
-                            self.__validators[validator],
-                            args=(keys[key]),
-                            kwargs=pattern.validation[key][validator])
-                    )
+                    validator_class = self.manager.get_validator(validator)
+                    kwargs = pattern.validation[key][validator] or {}
+                    if iscoroutinefunction(validator_class.check):
+                        valid = await validator_class(keys[key], **kwargs)
+                    else:
+                        valid = validator_class(keys[key], **kwargs)
 
                     if valid is None:
                         valid_keys = None
@@ -74,4 +69,3 @@ class Patcher:
         pattern.set_dict_after_patcher_check(valid_keys)
 
         return valid_keys
-

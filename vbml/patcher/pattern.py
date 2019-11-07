@@ -15,11 +15,13 @@ class Pattern:
     # Make whole text re-invisible
     escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^$"}
 
-    def __init__(self, text: str, prefix: List[str] = None, pattern: str = '{}$'):
+    def __init__(self, text: str, prefix: List[str] = None, pattern: str = "{}$"):
         prefix = re.compile(f"[{'|'.join(prefix)}]" if prefix else "")
 
         # Find all arguments with validators
-        typed_arguments = re.findall(r"(<([a-zA-Z0-9_]+)+:.*?>)", text.translate(self.escape))
+        typed_arguments = re.findall(
+            r"(<([a-zA-Z0-9_]+)+:.*?>)", text.translate(self.escape)
+        )
 
         # Delete arguments from regex
         text = re.sub(":.*?>", ">", text.translate(self.escape))
@@ -42,11 +44,16 @@ class Pattern:
 
             # Get arguments of validators
             for validator in validators:
-                arguments = list(flatten(
-                    [
-                        a.split(",")
-                        for a in re.findall(":" + validator + r"\\\[(.+)+\\\]", p[0])
-                    ]))
+                arguments = list(
+                    flatten(
+                        [
+                            a.split(",")
+                            for a in re.findall(
+                                ":" + validator + r"\\\[(.+)+\\\]", p[0]
+                            )
+                        ]
+                    )
+                )
                 validation[p[1]][validator] = arguments
 
         return validation
@@ -79,5 +86,5 @@ class Pattern:
 
     def dict(self):
         if not self._pregmatch:
-            raise PatternError('Trying to get variables from text before matching text')
+            raise PatternError("Trying to get variables from text before matching text")
         return self._pregmatch
