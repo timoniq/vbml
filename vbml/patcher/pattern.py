@@ -15,7 +15,8 @@ class Pattern:
     # Make whole text re-invisible
     escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^$"}
 
-    def __init__(self, text: str, prefix: List[str] = None, pattern: str = "{}$"):
+    def __init__(self, text: str = None, prefix: List[str] = None, pattern: str = "{}$"):
+        text = text or ""
         prefix = re.compile(f"[{'|'.join(prefix)}]" if prefix else "")
 
         # Find all arguments with validators
@@ -85,6 +86,6 @@ class Pattern:
         self._pregmatch = new_dict
 
     def dict(self):
-        if not self._pregmatch:
+        if self._pregmatch is None:
             raise PatternError("Trying to get variables from text before matching text")
         return self._pregmatch
