@@ -33,13 +33,15 @@ AnyValidator = typing.TypeVar(
 class ValidatorManager(ContextInstanceMixin):
     def __init__(self, validators: typing.Union[typing.List[AnyValidator], AnyValidator, typing.Callable] = None):
         self._validators: dict = {}
-        self._patched: bool = False
+        self._patched: typing.Union[None, dict] = None
+
         if validators is None:
             validators = []
 
         if inspect.isclass(validators) and issubclass(validators, PatchedValidators):
+            validators = validators()
             patched_validators = class_members(validators)
-            self._patched = True
+            self._patched = patched_validators
             self.validators.update(patched_validators)
         else:
             validators = validators if isinstance(validators, list) else [validators]
@@ -53,7 +55,7 @@ class ValidatorManager(ContextInstanceMixin):
         return self._validators
 
     @property
-    def patched(self) -> bool:
+    def patched(self) -> typing.Union[None, dict]:
         return self._patched
 
     def _validate_validator(self, validator: AnyValidator):

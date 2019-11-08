@@ -87,5 +87,5 @@ class Pattern:
 
     def dict(self):
         if self._pregmatch is None:
-            raise PatternError("Trying to get variables from text before matching text")
+            raise PatternError("Trying to get variables from text before matching text OR MATCHING WAS FAILED")
         return self._pregmatch

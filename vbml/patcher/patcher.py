@@ -54,13 +54,13 @@ class Patcher:
                     validator_class = self.manager.get_validator(validator)
                     args = pattern.validation[key][validator] or []
 
-                    if not self.manager.patched:
+                    if self.manager.patched is None:
                         if iscoroutinefunction(validator_class.check):
                             valid = await validator_class(keys[key], *args)
                         else:
                             valid = validator_class(keys[key], *args)
                     else:
-                        valid = await validator_class.__dict__[validator](validator_class, keys[key], *args)
+                        valid = await self.manager.patched[validator](keys[key], *args)
 
                     if valid is None:
                         valid_keys = None

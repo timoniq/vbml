@@ -32,7 +32,7 @@ class ContextInstanceMixin:
 
 def class_members(validators, validators_kwargs: dict = None) -> dict:
     members_tuple = getmembers(
-        validators(**validators_kwargs if validators_kwargs else {}),
+        validators,
         predicate=ismethod,
     )
-    return dict((x, validators) for x, y in members_tuple if not x.startswith("__"))
+    return dict((x, y) for x, y in members_tuple if not x.startswith("__"))
