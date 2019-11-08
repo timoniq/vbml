@@ -13,8 +13,6 @@ class Patcher:
         self.disable_validators = disable_validators
         self.prefix = []
         self.manager = manager or ValidatorManager.get_current()
-        if self.manager is None:
-            raise RuntimeError("Configure `ValidatorManager` for work with Patcher.")
 
     def add_manager(self, manager: ValidatorManager) -> None:
         self.manager = manager
@@ -38,6 +36,9 @@ class Patcher:
         return loop.run_until_complete(self._check(text, pattern))
 
     async def _check(self, text: str, pattern: Pattern):
+        if self.manager is None:
+            raise RuntimeError("Configure `ValidatorManager` for work with Patcher.")
+
         check = pattern(text)
 
         if not check:
