@@ -16,6 +16,9 @@ class Patcher:
         if self.manager is None:
             raise RuntimeError("Configure `ValidatorManager` for work with Patcher.")
 
+    def add_manager(self, manager: ValidatorManager) -> None:
+        self.manager = manager
+
     def pattern(self, text: str, **context):
         return Pattern(text, prefix=self.prefix, **context)
 
