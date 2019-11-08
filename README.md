@@ -1,5 +1,17 @@
 # vbml
 
+To install use this command:
+
+```shell
+pip install https://github.com/timoniq/vbml/archive/master.zip --upgrade
+```
+
+To add this project to your project requirements:
+
+* add string **-e https://github.com/timoniq/vbml/archive/master.zip** to your requirements file
+
+* add element **vbml @ https://github.com/timoniq/vbml/archive/master.zip** to your install_requires list
+
 Simple usage example:
 
 ```python
@@ -36,7 +48,6 @@ def main():
 
 
 main()
-
 ```
 
 You can ignore check only pattern, without validator formatting:
@@ -46,4 +57,4 @@ print(pattern(text))
 # >> {'name': 'vbml', 'age': '0'}
 ```
 
-
+Made with :heart:love by [timoniq](https://github.com/timoniq)
