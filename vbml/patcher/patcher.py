@@ -3,6 +3,7 @@ from inspect import iscoroutinefunction
 from typing import Optional
 import asyncio
 from ..validators import ValidatorManager
+from .standart import PatchedValidators
 
 
 class Patcher:
@@ -52,10 +53,14 @@ class Patcher:
 
                     validator_class = self.manager.get_validator(validator)
                     args = pattern.validation[key][validator] or []
-                    if iscoroutinefunction(validator_class.check):
-                        valid = await validator_class(keys[key], *args)
+
+                    if not self.manager.patched:
+                        if iscoroutinefunction(validator_class.check):
+                            valid = await validator_class(keys[key], *args)
+                        else:
+                            valid = validator_class(keys[key], *args)
                     else:
-                        valid = validator_class(keys[key], *args)
+                        valid = await validator_class.__dict__[validator](validator_class, keys[key], *args)
 
                     if valid is None:
                         valid_keys = None

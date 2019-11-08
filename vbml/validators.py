@@ -1,6 +1,8 @@
 import abc
 import typing
-from .utils import ContextInstanceMixin
+import inspect
+from .utils import ContextInstanceMixin, class_members
+from .patcher.standart import PatchedValidators
 
 
 class AbstractValidator(metaclass=abc.ABCMeta):
@@ -29,19 +31,30 @@ AnyValidator = typing.TypeVar(
 
 
 class ValidatorManager(ContextInstanceMixin):
-    def __init__(self, validators: typing.Union[typing.List[AnyValidator], AnyValidator] = None):
-        if validators is None:
-            validators: typing.List[AnyValidator] = []
+    def __init__(self, validators: typing.Union[typing.List[AnyValidator], AnyValidator, typing.Callable] = None):
         self._validators: dict = {}
-        validators = validators if isinstance(validators, list) else [validators]
-        for validator in validators:
-            self.add_validator(validator)
+        self._patched: bool = False
+        if validators is None:
+            validators = []
+
+        if inspect.isclass(validators) and issubclass(validators, PatchedValidators):
+            patched_validators = class_members(validators)
+            self._patched = True
+            self.validators.update(patched_validators)
+        else:
+            validators = validators if isinstance(validators, list) else [validators]
+            for validator in validators:
+                self.add_validator(validator)
 
         self.set_current(self)
 
     @property
     def validators(self) -> typing.Dict:
         return self._validators
+
+    @property
+    def patched(self) -> bool:
+        return self._patched
 
     def _validate_validator(self, validator: AnyValidator):
         if validator.key is None or not isinstance(validator.key, str):
@@ -50,12 +63,12 @@ class ValidatorManager(ContextInstanceMixin):
         if exist:
             raise RuntimeError(f"Validator manager have already this key ({exist!r})")
 
-    def add_validator(self, validator: AnyValidator) -> None:
+    def add_validator(self, validator) -> None:
         self._validate_validator(validator)
         self.validators.update({validator.key: validator})
 
     def get_validator(self, key: str) -> AnyValidator:
         validator = self.validators.get(key)
         if not validator:
-            raise RuntimeError("Unknown validator")
+            raise RuntimeError("Unknown validator \"{}\"".format(key))
         return validator
