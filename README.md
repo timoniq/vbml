@@ -5,6 +5,11 @@ To install use this command:
 ```shell
 pip install https://github.com/timoniq/vbml/archive/master.zip --upgrade
 ```
+or:  
+
+```shell
+pip install vbml
+```
 
 To add this project to your project requirements:
 
