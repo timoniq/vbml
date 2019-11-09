@@ -4,9 +4,10 @@ from typing import Optional
 import asyncio
 from ..validators import ValidatorManager
 from .standart import PatchedValidators
+from ..utils import ContextInstanceMixin
 
 
-class Patcher:
+class Patcher(ContextInstanceMixin):
     def __init__(
         self, disable_validators: bool = False, manager: ValidatorManager = None
     ):
