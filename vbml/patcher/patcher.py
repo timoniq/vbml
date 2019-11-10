@@ -14,6 +14,7 @@ class Patcher(ContextInstanceMixin):
         self.disable_validators = disable_validators
         self.prefix = []
         self.manager = manager or ValidatorManager.get_current()
+        self.set_current(self)
 
     def add_manager(self, manager: ValidatorManager) -> None:
         self.manager = manager
