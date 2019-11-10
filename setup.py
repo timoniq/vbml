@@ -5,7 +5,7 @@ with open('README.md', 'r', encoding='utf-8') as f:
 
 setuptools.setup(
     name="vbml",
-    version="0.1",
+    version="0.2",
     author="timoniq",
     description="Way to check",
     long_description=long_description,
