@@ -13,9 +13,9 @@ pip install vbml
 
 To add this project to your project requirements:
 
-* add string **-e https://github.com/timoniq/vbml/archive/master.zip** to your requirements file
+* add string `vbml` or `-e https://github.com/timoniq/vbml/archive/master.zip` to your requirements file
 
-* add element **vbml @ https://github.com/timoniq/vbml/archive/master.zip** to your install_requires list
+* add element `vbml` or `vbml @ https://github.com/timoniq/vbml/archive/master.zip` to your install_requires list
 
 Simple usage example:
 
