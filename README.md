@@ -1,4 +1,10 @@
-# vbml
+# 
+
+<h1 align="center">VBML: can i help you?</h1>
+<p align="center"><a href="https://pypi.org/project/vkbottle/"><img alt="downloads" src="https://img.shields.io/static/v1?label=pypi%20package&message=0.13&color=brightgreen"></a> <a href="https://github.com/timoniq/vkbottle"><img src="https://img.shields.io/static/v1?label=version&message=opensource&color=yellow" alt="service-test status"></a> <a href="https://vk.me/join/AJQ1d4n6rRVBAR2PGh8zChFS"><img src="https://img.shields.io/static/v1?message=VK%20Chat&label=&color=blue"></a>
+    <blockquote>VBML - it is a strong, easy, fast and full-functionality module for parsing and splitting messages to the smaller parts by just two strings - pattern and compared text</blockquote>
+</p>
+<hr>
 
 To install use this command:
 
@@ -13,40 +19,33 @@ pip install vbml
 
 To add this project to your project requirements:
 
-* add string `vbml` or `-e https://github.com/timoniq/vbml/archive/master.zip` to your requirements file
+* add string `vbml` to your requirements file
 
-* add element `vbml` or `vbml @ https://github.com/timoniq/vbml/archive/master.zip` to your install_requires list
+* add element `vbml` to your install_requires list
+
+You don't need to assign special version because syntax in all versions of VBML is similar
+
+### Documentation
+
+You can find full documentation at [wiki](https://github.com/timoniq/vbml/wiki/VBML-Usage)
 
 Simple usage example:
 
 ```python
 from vbml import Patcher
-import typing
-from vbml.validators import ValidatorManager, AbstractAsynchronousValidator
 
-
-class MyValidator(AbstractAsynchronousValidator):
-    key = "int"
-
-    async def check(self, text: str, *args) -> typing.Union[typing.Any, None]:
-        if text.isdigit():
-            return int(text)
-
-
-# Init your VBML main processor
-manager = ValidatorManager([MyValidator()])
 patcher = Patcher()
 # Create a pattern
-pattern = patcher.pattern("i am <name> my age is <age:int> years")
+pattern = patcher.pattern("i am <name> and i love <item>")
 # Mind about text sample
-text = "i am vbml my age is 0 years"
+text = "i am vasya and i love ice cream"
 text2 = "amm.. some text"
 
 
 def main():
     # Go
     print(patcher.check(text, pattern))
-    # >> {'name': 'vbml', 'age': 0}
+    # >> {'name': 'vasya', 'item': 'ice cream'}
 
     print(patcher.check(text2, pattern))
     # >> None
@@ -55,11 +54,4 @@ def main():
 main()
 ```
 
-You can ignore check only pattern, without validator formatting:
-
-```python
-print(pattern(text))
-# >> {'name': 'vbml', 'age': '0'}
-```
-
-Made with :heart:love by [timoniq](https://github.com/timoniq)
+Made with :heart: love by [timoniq](https://github.com/timoniq)

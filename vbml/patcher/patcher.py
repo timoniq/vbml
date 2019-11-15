@@ -12,7 +12,6 @@ class Patcher(ContextInstanceMixin):
         self, disable_validators: bool = False, manager: ValidatorManager = None
     ):
         self.disable_validators = disable_validators
-        self.prefix = []
         self.manager = manager or ValidatorManager.get_current()
         self.set_current(self)
 
@@ -20,7 +19,7 @@ class Patcher(ContextInstanceMixin):
         self.manager = manager
 
     def pattern(self, text: str, **context):
-        return Pattern(text, prefix=self.prefix, **context)
+        return Pattern(text, **context)
 
     async def check_async(
         self, text: str, pattern: Pattern, ignore_features: bool = False
@@ -37,11 +36,14 @@ class Patcher(ContextInstanceMixin):
             raise RuntimeError("Please `check_async` when loop is running.")
         return loop.run_until_complete(self._check(text, pattern))
 
-    async def _check(self, text: str, pattern: Pattern):
+    async def _check(self, text: str, pattern: Pattern, ignore_validation: bool = False):
         if self.manager is None:
             raise RuntimeError("Configure `ValidatorManager` for work with Patcher.")
 
         check = pattern(text)
+
+        if ignore_validation:
+            return check
 
         if not check:
             return None
@@ -77,6 +79,6 @@ class Patcher(ContextInstanceMixin):
             else:
                 valid_keys[key] = keys[key]
 
-        pattern.set_dict_after_patcher_check(valid_keys)
+        pattern.set_dict(valid_keys)
 
         return valid_keys

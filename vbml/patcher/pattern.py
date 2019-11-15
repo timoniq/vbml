@@ -1,5 +1,6 @@
 import re
 from .exceptions import PatternError
+from .standart import PostValidation
 from typing import List, Tuple, Sequence, Optional
 
 
@@ -11,53 +12,35 @@ def flatten(lis):
             yield item
 
 
+ARG_PREFIX = '<'
+ARG_SUFFIX = '>'
+
+
 class Pattern:
     # Make whole text re-invisible
-    escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^$"}
+    escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}"}
 
-    def __init__(self, text: str = None, prefix: List[str] = None, pattern: str = "{}$"):
+    def __init__(
+            self,
+            text: str = None,
+            pattern: str = "{}$"
+    ):
         text = text or ""
-        prefix = re.compile(f"[{'|'.join(prefix)}]" if prefix else "")
+        findall = re.findall
 
         # Find all arguments with validators
-        typed_arguments = re.findall(
+        typed_arguments = findall(
             r"(<([a-zA-Z0-9_]+)+:.*?>)", text.translate(self.escape)
         )
 
         # Delete arguments from regex
-        text = re.sub(":.*?>", ">", text.translate(self.escape))
+        text = re.sub(":.*?>", ">", text)
+        text = re.sub(r"<(.*?)>", r"(?P<\1>.*?)", text.translate(self.escape))
 
-        text = re.sub(r"(<.*?>)", r"(?P\1.*?)", text.translate(self.escape))
-
-        self._compiler = re.compile(prefix.pattern + pattern.format(text))
-        self._validation: dict = self.__validators__(typed_arguments)
-        self._arguments: list = re.findall(r"<(.*?)>", text.translate(self.escape))
+        self._compiler = re.compile(pattern.format(text))
+        self._validation: dict = PostValidation.get_validators(typed_arguments)
+        self._arguments: list = findall("<(.*?)>", text.translate(self.escape))
         self._pregmatch: Optional[dict] = None
-
-    @staticmethod
-    def __validators__(typed_arguments: List[Tuple[str]]) -> dict:
-        validation: dict = {}
-
-        for p in typed_arguments:
-
-            validators = re.findall(r":([a-zA-Z0-9_]+)+", p[0])
-            validation[p[1]] = dict()
-
-            # Get arguments of validators
-            for validator in validators:
-                arguments = list(
-                    flatten(
-                        [
-                            a.split(",")
-                            for a in re.findall(
-                                ":" + validator + r"\\\[(.+)+\\\]", p[0]
-                            )
-                        ]
-                    )
-                )
-                validation[p[1]][validator] = arguments
-
-        return validation
 
     def __call__(self, text: str):
         """
@@ -72,7 +55,7 @@ class Pattern:
 
     @property
     def pattern(self):
-        return self._compiler
+        return self._compiler.pattern
 
     @property
     def validation(self):
@@ -82,8 +65,12 @@ class Pattern:
     def arguments(self):
         return self._arguments
 
-    def set_dict_after_patcher_check(self, new_dict: dict):
+    def set_dict(self, new_dict: dict):
         self._pregmatch = new_dict
+        return new_dict
+
+    def remove_dict(self):
+        self._pregmatch = None
 
     def dict(self):
         if self._pregmatch is None:
