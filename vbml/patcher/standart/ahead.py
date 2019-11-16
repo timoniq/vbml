@@ -1,0 +1,2 @@
+class AheadValidation:
+    pass

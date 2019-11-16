@@ -23,7 +23,8 @@ class Pattern:
     def __init__(
             self,
             text: str = None,
-            pattern: str = "{}$"
+            pattern: str = "{}$",
+            lazy: bool = True
     ):
         text = text or ""
         findall = re.findall
@@ -35,15 +36,31 @@ class Pattern:
 
         # Delete arguments from regex
         text = re.sub(r":.*?>", ">", text)
+
         # Get all inclusions from regex
         inclusions = [PostValidation.inclusion(inc) for inc in findall("<(.*?)>", text)]
+
         # Delete inclusion from regex
         text = re.sub(r"<\(.*?\)", "<", text)
-        # Investigate final pattern
-        text = re.sub(r"<(.*?)>", r"(?P<\1>.*?)", text.translate(self.escape))
 
+        ### Investigate final pattern
+        # Set pattern constants
         self._arguments: list = findall("<(.*?)>", text)
         self._inclusions: dict = dict(zip(self.arguments, inclusions))
+
+        # Remove regex-incompatible symbols
+        text = text.translate(self.escape)
+
+        # Reveal arguments
+        for arg in self.arguments:
+            text = text.replace(
+                "<{}>".format(arg),
+                '(?P<{arg}>{pre}.*{lazy})'.format(
+                    arg=arg,
+                    pre=self.inclusions.get(arg, "") or "",
+                    lazy="?" if lazy else ""
+                ))
+
         self._compiler = re.compile(pattern.format(text))
         self._validation: dict = PostValidation.get_validators(typed_arguments)
         self._pregmatch: Optional[dict] = None
@@ -56,7 +73,7 @@ class Pattern:
         """
         match = self._compiler.match(text)
         if match is not None:
-            self._pregmatch = PostValidation.append_inclusions(self.inclusions, match.groupdict())
+            self._pregmatch = match.groupdict()
             return True
 
     @property
