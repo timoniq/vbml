@@ -1,4 +1,4 @@
-from typing import List, Tuple, Sequence
+from typing import List, Tuple, Sequence, Optional
 import re
 
 
@@ -34,3 +34,16 @@ class PostValidation:
                 validation[p[1]][validator] = arguments
 
         return validation
+
+    @staticmethod
+    def inclusion(argument: str) -> Optional[str]:
+        inclusion = re.findall(r"^\((.*?)\)[a-zA-Z0-9_]+[:]?.*?$", argument)
+        if len(inclusion):
+            return inclusion[0]
+
+    @staticmethod
+    def append_inclusions(inclusions: dict, group_dict: dict):
+        for arg in group_dict:
+            if inclusions.get(arg) is not None:
+                group_dict[arg] = inclusions[arg] + group_dict[arg]
+        return group_dict

@@ -34,12 +34,18 @@ class Pattern:
         )
 
         # Delete arguments from regex
-        text = re.sub(":.*?>", ">", text)
+        text = re.sub(r":.*?>", ">", text)
+        # Get all inclusions from regex
+        inclusions = [PostValidation.inclusion(inc) for inc in findall("<(.*?)>", text)]
+        # Delete inclusion from regex
+        text = re.sub(r"<\(.*?\)", "<", text)
+        # Investigate final pattern
         text = re.sub(r"<(.*?)>", r"(?P<\1>.*?)", text.translate(self.escape))
 
+        self._arguments: list = findall("<(.*?)>", text)
+        self._inclusions: dict = dict(zip(self.arguments, inclusions))
         self._compiler = re.compile(pattern.format(text))
         self._validation: dict = PostValidation.get_validators(typed_arguments)
-        self._arguments: list = findall("<(.*?)>", text.translate(self.escape))
         self._pregmatch: Optional[dict] = None
 
     def __call__(self, text: str):
@@ -50,7 +56,7 @@ class Pattern:
         """
         match = self._compiler.match(text)
         if match is not None:
-            self._pregmatch = match.groupdict()
+            self._pregmatch = PostValidation.append_inclusions(self.inclusions, match.groupdict())
             return True
 
     @property
@@ -64,6 +70,10 @@ class Pattern:
     @property
     def arguments(self):
         return self._arguments
+
+    @property
+    def inclusions(self):
+        return self._inclusions
 
     def set_dict(self, new_dict: dict):
         self._pregmatch = new_dict
