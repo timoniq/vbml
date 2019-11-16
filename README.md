@@ -33,6 +33,20 @@ Simple usage example:
 
 ```python
 from vbml import Patcher
+from vbml.validators import ValidatorManager, AbstractAsynchronousValidator
+
+
+class MyValidator(AbstractAsynchronousValidator):
+ key = "int"
+
+ async def check(self, text: str, **kwargs):
+     valid = text.isdigit()
+     if valid:
+         return int(text)
+
+
+# Init your VBML main processor
+manager = ValidatorManager([MyValidator()])
 
 patcher = Patcher()
 # Create a pattern
