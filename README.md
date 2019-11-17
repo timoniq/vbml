@@ -23,8 +23,6 @@ To add this project to your project requirements:
 
 * add element `vbml` to your install_requires list
 
-You don't need to assign special version because syntax in all versions of VBML is similar
-
 ### Documentation
 
 You can find full documentation at [wiki](https://github.com/timoniq/vbml/wiki/VBML-Usage)
