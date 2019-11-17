@@ -61,6 +61,8 @@ class Pattern:
 
         # Reveal arguments
         for arg in self.arguments:
+            if arg == '':
+                raise PatternError("Argument can't be empty")
             if arg[0] in self.syntax:
                 text = text.replace(
                     "<{}>".format(arg.translate(self.escape)),

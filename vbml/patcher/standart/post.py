@@ -22,9 +22,9 @@ class Syntax:
     def union(args: list,
               arg: str,
               inclusion: dict):
-        if UNION_CHAR != args[-1]:
-            raise PatternError('Union <*> argument can be only the last argument')
         pattern = "(?P<" + UNION + ">.*)"
+        if len(arg.strip(UNION_CHAR)):
+            pattern = "(?P<" + arg.strip(UNION_CHAR) + ">.*)"
         return pattern
 
     @staticmethod
