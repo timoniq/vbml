@@ -14,9 +14,32 @@ def flatten(lis):
 SYNTAX: List[str] = ["*", "^"]
 UNION: str = "_union"
 UNION_CHAR: str = "*"
+ONE_CHAR_CHAR: str = "^"
 
 
-class PostValidation:
+class Syntax:
+    @staticmethod
+    def union(args: list,
+              arg: str,
+              inclusion: dict):
+        if UNION_CHAR != args[-1]:
+            raise PatternError('Union <*> argument can be only the last argument')
+        pattern = "(?P<" + UNION + ">.*)"
+        return pattern
+
+    @staticmethod
+    def one_char(args: list,
+              arg: str,
+              inclusion: dict):
+        pattern = "."
+        if inclusion.get(arg):
+            pattern = "[" + "|".join(list(inclusion[arg])) + "]"
+        if len(arg.strip(ONE_CHAR_CHAR)):
+            return "(?P<" + arg.strip(ONE_CHAR_CHAR) + ">" + pattern + ")"
+        return "(?P<char>.)"
+
+
+class PostValidation(Syntax):
 
     @staticmethod
     def get_validators(typed_arguments: List[Tuple[str]]) -> dict:
@@ -53,13 +76,3 @@ class PostValidation:
             if inclusions.get(arg) is not None:
                 group_dict[arg] = inclusions[arg] + group_dict[arg]
         return group_dict
-
-    @staticmethod
-    def union(args: list,
-              inclusions: dict,
-              validation: dict):
-        if "*" != args[-1]:
-            raise PatternError('Union <*> argument can be only the last argument')
-        pattern = "(?P<" + UNION + ">.*)"
-        return pattern
-

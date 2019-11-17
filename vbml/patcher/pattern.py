@@ -1,6 +1,6 @@
 import re
 from .exceptions import PatternError
-from .standart import PostValidation, AheadValidation, SYNTAX
+from .standart import PostValidation, AheadValidation, SYNTAX, UNION_CHAR, ONE_CHAR_CHAR
 from typing import List, Tuple, Sequence, Optional
 
 
@@ -21,7 +21,8 @@ class Pattern:
     escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}"}
     syntax = SYNTAX
     syntax_proc = {
-        '*': PostValidation.union
+        UNION_CHAR: PostValidation.union,
+        ONE_CHAR_CHAR: PostValidation.one_char,
     }
 
     def __init__(
@@ -60,10 +61,10 @@ class Pattern:
 
         # Reveal arguments
         for arg in self.arguments:
-            if arg in self.syntax:
+            if arg[0] in self.syntax:
                 text = text.replace(
                     "<{}>".format(arg.translate(self.escape)),
-                    self.syntax_proc[arg](self.arguments, self.inclusions, self.validation)
+                    self.syntax_proc[arg[0]](self.arguments, arg, self.inclusions)
                 )
             else:
                 text = text.replace(
