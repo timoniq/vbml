@@ -1,4 +1,5 @@
 from typing import List, Tuple, Sequence, Optional
+from ..exceptions import PatternError
 import re
 
 
@@ -8,6 +9,11 @@ def flatten(lis):
             yield from flatten(item)
         else:
             yield item
+
+
+SYNTAX: List[str] = ["*", "^"]
+UNION: str = "_union"
+UNION_CHAR: str = "*"
 
 
 class PostValidation:
@@ -37,7 +43,7 @@ class PostValidation:
 
     @staticmethod
     def inclusion(argument: str) -> Optional[str]:
-        inclusion = re.findall(r"^\((.*?)\)[a-zA-Z0-9_]+[:]?.*?$", argument)
+        inclusion = re.findall(r"^\((.*?)\)[a-zA-Z0-9_" + "".join(SYNTAX) + "]+[:]?.*?$", argument)
         if len(inclusion):
             return inclusion[0]
 
@@ -47,3 +53,13 @@ class PostValidation:
             if inclusions.get(arg) is not None:
                 group_dict[arg] = inclusions[arg] + group_dict[arg]
         return group_dict
+
+    @staticmethod
+    def union(args: list,
+              inclusions: dict,
+              validation: dict):
+        if "*" != args[-1]:
+            raise PatternError('Union <*> argument can be only the last argument')
+        pattern = "(?P<" + UNION + ">.*)"
+        return pattern
+

@@ -39,7 +39,7 @@ from vbml.validators import ValidatorManager, AbstractAsynchronousValidator
 class MyValidator(AbstractAsynchronousValidator):
  key = "int"
 
- async def check(self, text: str, **kwargs):
+ async def check(self, text: str, *args):
      valid = text.isdigit()
      if valid:
          return int(text)

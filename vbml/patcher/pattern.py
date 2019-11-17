@@ -1,6 +1,6 @@
 import re
 from .exceptions import PatternError
-from .standart import PostValidation
+from .standart import PostValidation, AheadValidation, SYNTAX
 from typing import List, Tuple, Sequence, Optional
 
 
@@ -19,6 +19,10 @@ ARG_SUFFIX = '>'
 class Pattern:
     # Make whole text re-invisible
     escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}"}
+    syntax = SYNTAX
+    syntax_proc = {
+        '*': PostValidation.union
+    }
 
     def __init__(
             self,
@@ -33,12 +37,14 @@ class Pattern:
         typed_arguments = findall(
             r"(<([a-zA-Z0-9_]+)+:.*?>)", text.translate(self.escape)
         )
+        # Save validators. Parse arguments
+        self._validation: dict = PostValidation.get_validators(typed_arguments)
 
         # Delete arguments from regex
         text = re.sub(r":.*?>", ">", text)
 
         # Get all inclusions from regex
-        inclusions = [PostValidation.inclusion(inc) for inc in findall("<(.*?)>", text)]
+        inclusions: List[Optional[str]] = [PostValidation.inclusion(inc) for inc in findall("<(.*?)>", text)]
 
         # Delete inclusion from regex
         text = re.sub(r"<\(.*?\)", "<", text)
@@ -47,22 +53,28 @@ class Pattern:
         # Set pattern constants
         self._arguments: list = findall("<(.*?)>", text)
         self._inclusions: dict = dict(zip(self.arguments, inclusions))
+        self._ahead = AheadValidation(self.inclusions)
 
         # Remove regex-incompatible symbols
         text = text.translate(self.escape)
 
         # Reveal arguments
         for arg in self.arguments:
-            text = text.replace(
-                "<{}>".format(arg),
-                '(?P<{arg}>{pre}.*{lazy})'.format(
-                    arg=arg,
-                    pre=self.inclusions.get(arg, "") or "",
-                    lazy="?" if lazy else ""
-                ))
+            if arg in self.syntax:
+                text = text.replace(
+                    "<{}>".format(arg.translate(self.escape)),
+                    self.syntax_proc[arg](self.arguments, self.inclusions, self.validation)
+                )
+            else:
+                text = text.replace(
+                    "<{}>".format(arg),
+                    '(?P<{arg}>{pre}.*{lazy})'.format(
+                        arg=arg,
+                        pre=self.inclusions.get(arg, "") or "",
+                        lazy="?" if lazy else ""
+                    ))
 
         self._compiler = re.compile(pattern.format(text))
-        self._validation: dict = PostValidation.get_validators(typed_arguments)
         self._pregmatch: Optional[dict] = None
 
     def __call__(self, text: str):
@@ -73,7 +85,7 @@ class Pattern:
         """
         match = self._compiler.match(text)
         if match is not None:
-            self._pregmatch = match.groupdict()
+            self._pregmatch = self._ahead.group(match)
             return True
 
     @property
