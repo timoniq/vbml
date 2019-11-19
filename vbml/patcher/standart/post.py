@@ -33,7 +33,8 @@ class Syntax:
               inclusion: dict):
         pattern = "."
         if inclusion.get(arg):
-            pattern = "[" + "|".join(list(inclusion[arg])) + "]"
+            inclusions = ["\\" + inc for inc in list(inclusion[arg])]
+            pattern = "[" + "|".join(inclusions) + "]"
         if len(arg.strip(ONE_CHAR_CHAR)):
             return "(?P<" + arg.strip(ONE_CHAR_CHAR) + ">" + pattern + ")"
         return "(?P<char>.)"
