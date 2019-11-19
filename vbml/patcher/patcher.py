@@ -76,7 +76,7 @@ class Patcher(ContextInstanceMixin):
                     else:
                         valid_keys[key] = valid
 
-            else:
+            elif valid_keys is not None:
                 valid_keys[key] = keys[key]
 
         pattern.set_dict(valid_keys)
