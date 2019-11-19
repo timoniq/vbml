@@ -18,7 +18,7 @@ ARG_SUFFIX = '>'
 
 class Pattern:
     # Make whole text re-invisible
-    escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}"}
+    escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}:"}
     syntax = SYNTAX
     syntax_proc = {
         UNION_CHAR: PostValidation.union,
@@ -42,7 +42,7 @@ class Pattern:
         self._validation: dict = PostValidation.get_validators(typed_arguments)
 
         # Delete arguments from regex
-        text = re.sub(r":.*?>", ">", text)
+        text = re.sub(r"<.*?(:.*?>)", ">", text)
 
         # Get all inclusions from regex
         inclusions: List[Optional[str]] = [PostValidation.inclusion(inc) for inc in findall("<(.*?)>", text)]

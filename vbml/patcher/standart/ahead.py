@@ -8,6 +8,8 @@ class AheadValidation:
 
     def group(self, match) -> dict:
         groupdict: dict = match.groupdict()
-        if UNION_CHAR in self._inclusions:
-            groupdict[UNION] = groupdict[UNION].split(self._inclusions[UNION_CHAR])
+        for inc in self._inclusions:
+            if inc[0] == UNION_CHAR:
+                union_name = inc.strip(UNION_CHAR) or UNION
+                groupdict[union_name] = groupdict[union_name].split(self._inclusions[inc])
         return groupdict
