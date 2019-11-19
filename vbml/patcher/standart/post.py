@@ -11,26 +11,31 @@ def flatten(lis):
             yield item
 
 
-SYNTAX: List[str] = ["*", "^"]
+SYNTAX: List[str] = ["*", "^", "#"]
 UNION: str = "_union"
 UNION_CHAR: str = "*"
 ONE_CHAR_CHAR: str = "^"
+EXCEPT_CHAR: str = "#"
 
 
 class Syntax:
     @staticmethod
-    def union(args: list,
-              arg: str,
-              inclusion: dict):
+    def union(
+            args: list,
+            arg: str,
+            inclusion: dict
+    ):
         pattern = "(?P<" + UNION + ">.*)"
         if len(arg.strip(UNION_CHAR)):
             pattern = "(?P<" + arg.strip(UNION_CHAR) + ">.*)"
         return pattern
 
     @staticmethod
-    def one_char(args: list,
-              arg: str,
-              inclusion: dict):
+    def one_char(
+            args: list,
+            arg: str,
+            inclusion: dict
+    ):
         pattern = "."
         if inclusion.get(arg):
             inclusions = ["\\" + inc for inc in list(inclusion[arg])]
@@ -38,6 +43,24 @@ class Syntax:
         if len(arg.strip(ONE_CHAR_CHAR)):
             return "(?P<" + arg.strip(ONE_CHAR_CHAR) + ">" + pattern + ")"
         return "(?P<char>.)"
+
+    @staticmethod
+    def except_of(
+            args: list,
+            arg: str,
+            inclusion: dict
+    ):
+        if not inclusion.get(arg):
+            raise PatternError("Except argument expression have to contain not less than one symbol in inclusion")
+        elif not len(arg.strip(EXCEPT_CHAR)):
+            raise PatternError("Except expression should be named")
+
+        inclusions = ["\\" + inc for inc in list(inclusion[arg])]
+        pattern = "[^" + "|".join(inclusions) + "]"
+        return "(?P<{}>{}+)".format(
+            arg.strip(EXCEPT_CHAR),
+            pattern
+        )
 
 
 class PostValidation(Syntax):

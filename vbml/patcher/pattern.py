@@ -1,6 +1,13 @@
 import re
 from .exceptions import PatternError
-from .standart import PostValidation, AheadValidation, SYNTAX, UNION_CHAR, ONE_CHAR_CHAR
+from .standart import (
+    PostValidation,
+    AheadValidation,
+    SYNTAX,
+    UNION_CHAR,
+    ONE_CHAR_CHAR,
+    EXCEPT_CHAR
+)
 from typing import List, Tuple, Sequence, Optional
 
 
@@ -23,6 +30,7 @@ class Pattern:
     syntax_proc = {
         UNION_CHAR: PostValidation.union,
         ONE_CHAR_CHAR: PostValidation.one_char,
+        EXCEPT_CHAR: PostValidation.except_of,
     }
 
     def __init__(
