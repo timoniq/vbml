@@ -6,6 +6,10 @@
 </p>
 <hr>
 
+### `I am <name>`
+### `I am VBML`
+### `{"name": "VBML"}`
+
 To install use this command:
 
 ```shell
@@ -25,7 +29,7 @@ To add this project to your project requirements:
 
 ### Documentation
 
-You can find full documentation at [wiki](https://github.com/timoniq/vbml/wiki/VBML-Usage)
+You can find full documentation at [wiki pages](https://github.com/timoniq/vbml/wiki/VBML-Usage)
 
 Simple usage example:
 

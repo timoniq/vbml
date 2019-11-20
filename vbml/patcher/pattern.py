@@ -44,7 +44,7 @@ class Pattern:
 
         # Find all arguments with validators
         typed_arguments = findall(
-            r"(<([a-zA-Z0-9_]+)+:.*?>)", text.translate(self.escape)
+            r"(<.*?([a-zA-Z0-9_]+)+:.*?>)", text.translate(self.escape)
         )
         # Save validators. Parse arguments
         self._validation: dict = PostValidation.get_validators(typed_arguments)
