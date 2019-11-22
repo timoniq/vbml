@@ -19,11 +19,14 @@ EXCEPT_CHAR: str = "#"
 
 
 class Syntax:
+    escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}"}
+
     @staticmethod
     def union(
             args: list,
             arg: str,
-            inclusion: dict
+            inclusion: dict,
+            **context
     ):
         pattern = "(?P<" + UNION + ">.*)"
         if len(arg.strip(UNION_CHAR)):
@@ -34,29 +37,30 @@ class Syntax:
     def one_char(
             args: list,
             arg: str,
-            inclusion: dict
+            inclusion: dict,
+            **context
     ):
         pattern = "."
         if inclusion.get(arg):
-            inclusions = ["\\" + inc for inc in list(inclusion[arg])]
-            pattern = "[" + "|".join(inclusions) + "]"
+            # inclusions = ["\\" + inc for inc in list(inclusion[arg])]
+            pattern = "[" + inclusion[arg] + "]"
         if len(arg.strip(ONE_CHAR_CHAR)):
             return "(?P<" + arg.strip(ONE_CHAR_CHAR) + ">" + pattern + ")"
-        return "(?P<char>.)"
+        return "(?P<char>" + pattern + ")"
 
     @staticmethod
     def except_of(
             args: list,
             arg: str,
-            inclusion: dict
+            inclusion: dict,
+            **context
     ):
         if not inclusion.get(arg):
             raise PatternError("Except argument expression have to contain not less than one symbol in inclusion")
         elif not len(arg.strip(EXCEPT_CHAR)):
             raise PatternError("Except expression should be named")
 
-        inclusions = ["\\" + inc for inc in list(inclusion[arg])]
-        pattern = "[^" + "|".join(inclusions) + "]"
+        pattern = "[^" + inclusion.get(arg) + "]"
         return "(?P<{}>{}+)".format(
             arg.strip(EXCEPT_CHAR),
             pattern

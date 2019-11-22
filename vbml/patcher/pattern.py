@@ -37,7 +37,8 @@ class Pattern:
             self,
             text: str = None,
             pattern: str = "{}$",
-            lazy: bool = True
+            lazy: bool = True,
+            **context
     ):
         text = text or ""
         findall = re.findall
@@ -74,7 +75,7 @@ class Pattern:
             if arg[0] in self.syntax:
                 text = text.replace(
                     "<{}>".format(arg.translate(self.escape)),
-                    self.syntax_proc[arg[0]](self.arguments, arg, self.inclusions)
+                    self.syntax_proc[arg[0]](self.arguments, arg, self.inclusions, **context)
                 )
             else:
                 text = text.replace(
