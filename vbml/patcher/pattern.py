@@ -42,6 +42,7 @@ class Pattern:
     ):
         text = text or ""
         findall = re.findall
+        self._vbml = re.sub(r"<.*?>", "?", text)
 
         # Find all arguments with validators
         typed_arguments = findall(
@@ -115,6 +116,10 @@ class Pattern:
     @property
     def inclusions(self):
         return self._inclusions
+
+    @property
+    def representation(self):
+        return self._vbml
 
     def set_dict(self, new_dict: dict):
         self._pregmatch = new_dict
