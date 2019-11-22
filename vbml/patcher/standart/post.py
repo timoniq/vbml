@@ -40,13 +40,15 @@ class Syntax:
             inclusion: dict,
             **context
     ):
+        if not len(arg.strip(ONE_CHAR_CHAR)):
+            raise PatternError("Char argument should be named")
+
         pattern = "."
         if inclusion.get(arg):
             # inclusions = ["\\" + inc for inc in list(inclusion[arg])]
             pattern = "[" + inclusion[arg] + "]"
-        if len(arg.strip(ONE_CHAR_CHAR)):
-            return "(?P<" + arg.strip(ONE_CHAR_CHAR) + ">" + pattern + ")"
-        return "(?P<char>" + pattern + ")"
+
+        return "(?P<" + arg.strip(ONE_CHAR_CHAR) + ">" + pattern + ")"
 
     @staticmethod
     def except_of(
@@ -60,7 +62,8 @@ class Syntax:
         elif not len(arg.strip(EXCEPT_CHAR)):
             raise PatternError("Except expression should be named")
 
-        pattern = "[^" + inclusion.get(arg) + "]"
+        pattern = "[^" + inclusion[arg] + "]"
+
         return "(?P<{}>{}+)".format(
             arg.strip(EXCEPT_CHAR),
             pattern
