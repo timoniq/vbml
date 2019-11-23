@@ -42,7 +42,6 @@ class Pattern:
     ):
         text = text or ""
         findall = re.findall
-        self._vbml = re.sub(r"<.*?>", "?", text)
 
         # Find all arguments with validators
         typed_arguments = findall(
@@ -55,10 +54,15 @@ class Pattern:
         text = re.sub(r"(:.*?)*>", ">", text)
 
         # Get all inclusions from regex
-        inclusions: List[Optional[str]] = [PostValidation.inclusion(inc) for inc in findall("<(.*?)>", text)]
+        inclusions: List[Optional[str]] = context.get("inclusions") or [
+            PostValidation.inclusion(inc) for inc in findall("<(.*?)>", text)
+        ]
 
         # Delete inclusion from regex
         text = re.sub(r"<\(.*?\)", "<", text)
+
+        # Add representation
+        self._vbml = re.sub(r"<(.*?)>", context.get("repr_noun", "?"), text)
 
         ### Investigate final pattern
         # Set pattern constants
@@ -76,7 +80,10 @@ class Pattern:
             if arg[0] in self.syntax:
                 text = text.replace(
                     "<{}>".format(arg.translate(self.escape)),
-                    self.syntax_proc[arg[0]](self.arguments, arg, self.inclusions, **context)
+                    self.syntax_proc[arg[0]](self.arguments,
+                                             arg,
+                                             self.inclusions,
+                                             **context)
                 )
             else:
                 text = text.replace(
@@ -87,7 +94,8 @@ class Pattern:
                         lazy="?" if lazy else ""
                     ))
 
-        self._compiler = re.compile(pattern.format(text))
+        self._compiler = re.compile(pattern.format(text),
+                                    flags=context.get("flags"))
         self._pregmatch: Optional[dict] = None
 
     def __call__(self, text: str):
