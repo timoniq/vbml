@@ -95,7 +95,7 @@ class Pattern:
                     ))
 
         self._compiler = re.compile(pattern.format(text),
-                                    flags=context.get("flags"))
+                                    flags=context.get("flags", 0))
         self._pregmatch: Optional[dict] = None
 
     def __call__(self, text: str):
