@@ -6,7 +6,8 @@ from .standart import (
     SYNTAX,
     UNION_CHAR,
     ONE_CHAR_CHAR,
-    EXCEPT_CHAR
+    EXCEPT_CHAR,
+    REGEX_CHAR
 )
 from typing import List, Tuple, Sequence, Optional
 
@@ -25,12 +26,13 @@ ARG_SUFFIX = '>'
 
 class Pattern:
     # Make whole text re-invisible
-    escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}"}
+    escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}:"}
     syntax = SYNTAX
     syntax_proc = {
         UNION_CHAR: PostValidation.union,
         ONE_CHAR_CHAR: PostValidation.one_char,
         EXCEPT_CHAR: PostValidation.except_of,
+        REGEX_CHAR: PostValidation.regex_arg,
     }
 
     def __init__(
@@ -51,7 +53,7 @@ class Pattern:
         self._validation: dict = PostValidation.get_validators(typed_arguments)
 
         # Delete arguments from regex
-        text = re.sub(r"(:.*?)*>", ">", text)
+        text = re.sub(r"<(.*?)(?::.*?)*>", r"<\1>", text)
 
         # Get all inclusions from regex
         inclusions: List[Optional[str]] = context.get("inclusions") or [
@@ -59,7 +61,7 @@ class Pattern:
         ]
 
         # Delete inclusion from regex
-        text = re.sub(r"<\(.*?\)", "<", text)
+        text = re.sub(r"<\((?:.*?)\)(.*?)>", r"<\1>", text)
 
         # Add representation
         self._vbml = re.sub(r"<(.*?)>", context.get("repr_noun", "?"), text)

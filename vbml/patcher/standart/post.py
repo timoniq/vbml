@@ -11,11 +11,12 @@ def flatten(lis):
             yield item
 
 
-SYNTAX: List[str] = ["*", "^", "#"]
+SYNTAX: List[str] = ["*", "^", "#", "$"]
 UNION: str = "_union"
 UNION_CHAR: str = "*"
 ONE_CHAR_CHAR: str = "^"
 EXCEPT_CHAR: str = "#"
+REGEX_CHAR: str = "$"
 
 
 class Syntax:
@@ -68,6 +69,17 @@ class Syntax:
             arg.strip(EXCEPT_CHAR),
             pattern
         )
+
+    @staticmethod
+    def regex_arg(
+            args: list,
+            arg: str,
+            inclusion: dict,
+            **context
+    ):
+        if not inclusion.get(arg):
+            raise PatternError("Regex argument expression have to contain not less than one symbol in inclusion")
+        return inclusion[arg]
 
 
 class PostValidation(Syntax):
