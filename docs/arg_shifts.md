@@ -54,3 +54,14 @@ print(pattern("I am Marie de Agata")) # None
 **Naming after denied-match symbol** is argument name. If naming is not indicated, exception will be raised
 
 Validators is OK
+
+### Regex minified pattern
+Example:
+```python
+pattern = Pattern("omg <([a-zA-Z1-9]{0,5})$>")
+print(pattern("omg ash")) # {}
+print(pattern("omg helicopter")) # None
+```
+**Inclusion value** is regex pattern
+
+**Naming after regex-match symbol** is not needed
