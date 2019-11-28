@@ -96,15 +96,11 @@ class PostValidation(Syntax):
             # Get arguments of validators
             for validator in validators:
                 if validator.strip("[]") != validator:
-                    print(validator)
                     nestings = [n.strip() for n in list(validator.strip("[]").split(','))]
-                    print(nestings)
                     for nesting in nestings:
                         if not isinstance(context.get(nesting), Callable):
                             raise PatternError("\"{}\" nesting is missing in context".format(nesting))
-                        print(nesting)
                         nested.update(**{nesting: context.get(nesting)})
-                    print(nested)
                 else:
                     validation[p[1]] = dict()
                     arguments = list(

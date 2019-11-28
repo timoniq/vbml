@@ -49,7 +49,7 @@ class Pattern:
         typed_arguments = findall(
             r"(<.*?([a-zA-Z0-9_]+):.*?>)", text
         )
-        print(typed_arguments, text.translate(self.escape))
+        
         # Save validators. Parse arguments
         self._validation, self._nested = PostValidation.get_validators(typed_arguments, context)
 
