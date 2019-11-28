@@ -1,4 +1,4 @@
-from typing import List, Tuple, Sequence, Optional
+from typing import List, Tuple, Sequence, Optional, Callable
 from ..exceptions import PatternError
 import re
 
@@ -85,27 +85,39 @@ class Syntax:
 class PostValidation(Syntax):
 
     @staticmethod
-    def get_validators(typed_arguments: List[Tuple[str]]) -> dict:
+    def get_validators(typed_arguments: List[Tuple[str]], context: dict) -> (dict, dict):
         validation: dict = {}
+        nested: dict = {}
 
         for p in typed_arguments:
 
-            validators = re.findall(r":([a-zA-Z0-9_]+)+", p[0])
-            validation[p[1]] = dict()
+            validators = re.findall(r":([\[]?[a-zA-Z0-9_, ]+[\]]?)+", p[0])
 
             # Get arguments of validators
             for validator in validators:
-                arguments = list(
-                    flatten([
-                        a.split(",")
-                        for a in re.findall(
-                            ":" + validator + r"\\\[(.+)+\\\]", p[0]
-                        )]
+                if validator.strip("[]") != validator:
+                    print(validator)
+                    nestings = [n.strip() for n in list(validator.strip("[]").split(','))]
+                    print(nestings)
+                    for nesting in nestings:
+                        if not isinstance(context.get(nesting), Callable):
+                            raise PatternError("\"{}\" nesting is missing in context".format(nesting))
+                        print(nesting)
+                        nested.update(**{nesting: context.get(nesting)})
+                    print(nested)
+                else:
+                    validation[p[1]] = dict()
+                    arguments = list(
+                        flatten([
+                            a.split(",")
+                            for a in re.findall(
+                                ":" + validator + r"\\\[(.+)+\\\]", p[0]
+                            )]
+                        )
                     )
-                )
-                validation[p[1]][validator] = arguments
+                    validation[p[1]][validator] = arguments
 
-        return validation
+        return validation, nested
 
     @staticmethod
     def inclusion(argument: str) -> Optional[str]:

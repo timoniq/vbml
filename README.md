@@ -6,10 +6,17 @@
 </p>
 <hr>
 
+### Features
+
+* Fast and asynchronous parser
+* Abstract validators support
+* Easy and intellectually clear parser:
+
 ### `I am <name>`
 ### `I am VBML`
 ### `{"name": "VBML"}`
 
+### Installation
 To install use this command:
 
 ```shell
@@ -69,5 +76,7 @@ def main():
 
 main()
 ```
+
+UPD: Documentation was copied into [/docs folder](/docs)
 
 Made with :heart: love by [timoniq](https://github.com/timoniq)

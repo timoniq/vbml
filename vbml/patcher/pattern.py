@@ -47,10 +47,11 @@ class Pattern:
 
         # Find all arguments with validators
         typed_arguments = findall(
-            r"(<.*?([a-zA-Z0-9_]+)+:.*?>)", text.translate(self.escape)
+            r"(<.*?([a-zA-Z0-9_]+):.*?>)", text
         )
+        print(typed_arguments, text.translate(self.escape))
         # Save validators. Parse arguments
-        self._validation: dict = PostValidation.get_validators(typed_arguments)
+        self._validation, self._nested = PostValidation.get_validators(typed_arguments, context)
 
         # Delete arguments from regex
         text = re.sub(r"<(.*?)(?::.*?)*>", r"<\1>", text)
@@ -70,7 +71,7 @@ class Pattern:
         # Set pattern constants
         self._arguments: list = findall("<(.*?)>", text)
         self._inclusions: dict = dict(zip(self.arguments, inclusions))
-        self._ahead = AheadValidation(self.inclusions)
+        self._ahead = AheadValidation(self.inclusions, self.nested)
 
         # Remove regex-incompatible symbols
         text = text.translate(self.escape)
@@ -130,6 +131,10 @@ class Pattern:
     @property
     def representation(self):
         return self._vbml
+
+    @property
+    def nested(self):
+        return self._nested
 
     def set_dict(self, new_dict: dict):
         self._pregmatch = new_dict
