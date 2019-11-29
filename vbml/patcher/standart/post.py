@@ -23,24 +23,14 @@ class Syntax:
     escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}"}
 
     @staticmethod
-    def union(
-            args: list,
-            arg: str,
-            inclusion: dict,
-            **context
-    ):
+    def union(args: list, arg: str, inclusion: dict, **context):
         pattern = "(?P<" + UNION + ">.*)"
         if len(arg.strip(UNION_CHAR)):
             pattern = "(?P<" + arg.strip(UNION_CHAR) + ">.*)"
         return pattern
 
     @staticmethod
-    def one_char(
-            args: list,
-            arg: str,
-            inclusion: dict,
-            **context
-    ):
+    def one_char(args: list, arg: str, inclusion: dict, **context):
         if not len(arg.strip(ONE_CHAR_CHAR)):
             raise PatternError("Char argument should be named")
 
@@ -52,40 +42,32 @@ class Syntax:
         return "(?P<" + arg.strip(ONE_CHAR_CHAR) + ">" + pattern + ")"
 
     @staticmethod
-    def except_of(
-            args: list,
-            arg: str,
-            inclusion: dict,
-            **context
-    ):
+    def except_of(args: list, arg: str, inclusion: dict, **context):
         if not inclusion.get(arg):
-            raise PatternError("Except argument expression have to contain not less than one symbol in inclusion")
+            raise PatternError(
+                "Except argument expression have to contain not less than one symbol in inclusion"
+            )
         elif not len(arg.strip(EXCEPT_CHAR)):
             raise PatternError("Except expression should be named")
 
         pattern = "[^" + inclusion[arg] + "]"
 
-        return "(?P<{}>{}+)".format(
-            arg.strip(EXCEPT_CHAR),
-            pattern
-        )
+        return "(?P<{}>{}+)".format(arg.strip(EXCEPT_CHAR), pattern)
 
     @staticmethod
-    def regex_arg(
-            args: list,
-            arg: str,
-            inclusion: dict,
-            **context
-    ):
+    def regex_arg(args: list, arg: str, inclusion: dict, **context):
         if not inclusion.get(arg):
-            raise PatternError("Regex argument expression have to contain not less than one symbol in inclusion")
+            raise PatternError(
+                "Regex argument expression have to contain not less than one symbol in inclusion"
+            )
         return inclusion[arg]
 
 
 class PostValidation(Syntax):
-
     @staticmethod
-    def get_validators(typed_arguments: List[Tuple[str]], context: dict) -> (dict, dict):
+    def get_validators(
+        typed_arguments: List[Tuple[str]], context: dict
+    ) -> (dict, dict):
         validation: dict = {}
         nested: dict = {}
 
@@ -96,19 +78,25 @@ class PostValidation(Syntax):
             # Get arguments of validators
             for validator in validators:
                 if validator.strip("[]") != validator:
-                    nestings = [n.strip() for n in list(validator.strip("[]").split(','))]
+                    nestings = [
+                        n.strip() for n in list(validator.strip("[]").split(","))
+                    ]
                     for nesting in nestings:
                         if not isinstance(context.get(nesting), Callable):
-                            raise PatternError("\"{}\" nesting is missing in context".format(nesting))
+                            raise PatternError(
+                                '"{}" nesting is missing in context'.format(nesting)
+                            )
                         nested.update(**{nesting: context.get(nesting)})
                 else:
                     validation[p[1]] = dict()
                     arguments = list(
-                        flatten([
-                            a.split(",")
-                            for a in re.findall(
-                                ":" + validator + r"\\\[(.+)+\\\]", p[0]
-                            )]
+                        flatten(
+                            [
+                                a.split(",")
+                                for a in re.findall(
+                                    ":" + validator + r"\\\[(.+)+\\\]", p[0]
+                                )
+                            ]
                         )
                     )
                     validation[p[1]][validator] = arguments
@@ -117,7 +105,9 @@ class PostValidation(Syntax):
 
     @staticmethod
     def inclusion(argument: str) -> Optional[str]:
-        inclusion = re.findall(r"^\((.*?)\)[a-zA-Z0-9_" + "".join(SYNTAX) + "]+[:]?.*?$", argument)
+        inclusion = re.findall(
+            r"^\((.*?)\)[a-zA-Z0-9_" + "".join(SYNTAX) + "]+[:]?.*?$", argument
+        )
         if len(inclusion):
             return inclusion[0]
 

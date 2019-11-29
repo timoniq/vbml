@@ -7,7 +7,7 @@ from .standart import (
     UNION_CHAR,
     ONE_CHAR_CHAR,
     EXCEPT_CHAR,
-    REGEX_CHAR
+    REGEX_CHAR,
 )
 from typing import List, Tuple, Sequence, Optional
 
@@ -20,8 +20,8 @@ def flatten(lis):
             yield item
 
 
-ARG_PREFIX = '<'
-ARG_SUFFIX = '>'
+ARG_PREFIX = "<"
+ARG_SUFFIX = ">"
 
 
 class Pattern:
@@ -36,22 +36,18 @@ class Pattern:
     }
 
     def __init__(
-            self,
-            text: str = None,
-            pattern: str = "{}$",
-            lazy: bool = True,
-            **context
+        self, text: str = None, pattern: str = "{}$", lazy: bool = True, **context
     ):
         text = text or ""
         findall = re.findall
 
         # Find all arguments with validators
-        typed_arguments = findall(
-            r"(<.*?([a-zA-Z0-9_]+):.*?>)", text
-        )
-        
+        typed_arguments = findall(r"(<.*?([a-zA-Z0-9_]+):.*?>)", text)
+
         # Save validators. Parse arguments
-        self._validation, self._nested = PostValidation.get_validators(typed_arguments, context)
+        self._validation, self._nested = PostValidation.get_validators(
+            typed_arguments, context
+        )
 
         # Delete arguments from regex
         text = re.sub(r"<(.*?)(?::.*?)*>", r"<\1>", text)
@@ -78,27 +74,26 @@ class Pattern:
 
         # Reveal arguments
         for arg in self.arguments:
-            if arg == '':
+            if arg == "":
                 raise PatternError("Argument can't be empty")
             if arg[0] in self.syntax:
                 text = text.replace(
                     "<{}>".format(arg.translate(self.escape)),
-                    self.syntax_proc[arg[0]](self.arguments,
-                                             arg,
-                                             self.inclusions,
-                                             **context)
+                    self.syntax_proc[arg[0]](
+                        self.arguments, arg, self.inclusions, **context
+                    ),
                 )
             else:
                 text = text.replace(
                     "<{}>".format(arg),
-                    '(?P<{arg}>{pre}.*{lazy})'.format(
+                    "(?P<{arg}>{pre}.*{lazy})".format(
                         arg=arg,
                         pre=self.inclusions.get(arg, "") or "",
-                        lazy="?" if lazy else ""
-                    ))
+                        lazy="?" if lazy else "",
+                    ),
+                )
 
-        self._compiler = re.compile(pattern.format(text),
-                                    flags=context.get("flags", 0))
+        self._compiler = re.compile(pattern.format(text), flags=context.get("flags", 0))
         self._pregmatch: Optional[dict] = None
 
     def __call__(self, text: str):
@@ -145,5 +140,7 @@ class Pattern:
 
     def dict(self):
         if self._pregmatch is None:
-            raise PatternError("Trying to get variables from text before matching text OR MATCHING WAS FAILED")
+            raise PatternError(
+                "Trying to get variables from text before matching text OR MATCHING WAS FAILED"
+            )
         return self._pregmatch

@@ -31,7 +31,12 @@ AnyValidator = typing.TypeVar(
 
 
 class ValidatorManager(ContextInstanceMixin):
-    def __init__(self, validators: typing.Union[typing.List[AnyValidator], AnyValidator, typing.Callable] = None):
+    def __init__(
+        self,
+        validators: typing.Union[
+            typing.List[AnyValidator], AnyValidator, typing.Callable
+        ] = None,
+    ):
         self._validators: dict = {}
         self._patched: typing.Union[None, dict] = None
 
@@ -72,5 +77,5 @@ class ValidatorManager(ContextInstanceMixin):
     def get_validator(self, key: str) -> AnyValidator:
         validator = self.validators.get(key)
         if not validator:
-            raise RuntimeError("Unknown validator \"{}\"".format(key))
+            raise RuntimeError('Unknown validator "{}"'.format(key))
         return validator

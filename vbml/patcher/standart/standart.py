@@ -25,6 +25,7 @@ class PatchedValidators:
     async def validator(self, value: str, *args):
         print(
             "Value {} was validated by default validator! Hold on.\nReceived args: {}".format(
-                value, args)
+                value, args
+            )
         )
         return value

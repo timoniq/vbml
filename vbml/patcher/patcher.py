@@ -36,7 +36,9 @@ class Patcher(ContextInstanceMixin):
             raise RuntimeError("Please `check_async` when loop is running.")
         return loop.run_until_complete(self._check(text, pattern))
 
-    async def _check(self, text: str, pattern: Pattern, ignore_validation: bool = False):
+    async def _check(
+        self, text: str, pattern: Pattern, ignore_validation: bool = False
+    ):
         if self.manager is None:
             raise RuntimeError("Configure `ValidatorManager` for work with Patcher.")
 
