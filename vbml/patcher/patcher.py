@@ -9,9 +9,13 @@ from ..utils import ContextInstanceMixin
 
 class Patcher(ContextInstanceMixin):
     def __init__(
-        self, disable_validators: bool = False, manager: ValidatorManager = None
+        self,
+        disable_validators: bool = False,
+        manager: ValidatorManager = None,
+        **pattern_context
     ):
         self.disable_validators = disable_validators
+        self.pattern_context = pattern_context
         self.manager = manager or ValidatorManager.get_current()
         self.set_current(self)
 
@@ -19,6 +23,7 @@ class Patcher(ContextInstanceMixin):
         self.manager = manager
 
     def pattern(self, text: str, **context):
+        context.update(self.pattern_context)
         return Pattern(text, **context)
 
     async def check_async(

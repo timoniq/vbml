@@ -73,13 +73,15 @@ class PostValidation(Syntax):
 
         for p in typed_arguments:
 
-            validators = re.findall(r":([\[]?[a-zA-Z0-9_, ]+[\]]?)+", p[0])
+            validators: List[str] = re.findall(
+                r":([a-zA-Z0-9_, ]+|[\[]+[a-zA-Z0-9_, ]+[\]]+)", p[0]
+            )
 
             # Get arguments of validators
             for validator in validators:
-                if validator.strip("[]") != validator:
+                if (validator[0], validator[-1]) == ("[", "]"):
                     nestings = [
-                        n.strip() for n in list(validator.strip("[]").split(","))
+                        n.strip() for n in list(validator.strip("[]").split(",")) if n
                     ]
                     for nesting in nestings:
                         if not isinstance(context.get(nesting), Callable):
