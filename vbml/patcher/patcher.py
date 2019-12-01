@@ -63,6 +63,8 @@ class Patcher(ContextInstanceMixin):
         valid_keys: Optional[dict] = {}
 
         for key in keys:
+            if valid_keys is None:
+                break
             if key in pattern.validation:
                 for validator in pattern.validation[key]:
 
