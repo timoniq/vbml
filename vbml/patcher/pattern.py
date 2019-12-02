@@ -50,7 +50,7 @@ class Pattern:
         )
 
         # Delete arguments from regex
-        text = re.sub(r"<(.*?)(?::.*?)*>", r"<\1>", text)
+        text = re.sub(r"<(.*?)(?::[\[\]a-zA-Z_0-9, ]+)*>", r"<\1>", text)
 
         # Get all inclusions from regex
         inclusions: List[Optional[str]] = context.get("inclusions") or [

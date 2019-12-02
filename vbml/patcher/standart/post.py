@@ -18,10 +18,10 @@ ONE_CHAR_CHAR: str = "^"
 EXCEPT_CHAR: str = "#"
 REGEX_CHAR: str = "$"
 
+escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}"}
+
 
 class Syntax:
-    escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}"}
-
     @staticmethod
     def union(args: list, arg: str, inclusion: dict, **context):
         pattern = "(?P<" + UNION + ">.*)"
@@ -107,11 +107,11 @@ class PostValidation(Syntax):
 
     @staticmethod
     def inclusion(argument: str) -> Optional[str]:
-        inclusion = re.findall(
+        inclusion: List[str] = re.findall(
             r"^\((.*?)\)[a-zA-Z0-9_" + "".join(SYNTAX) + "]+[:]?.*?$", argument
         )
         if len(inclusion):
-            return inclusion[0]
+            return inclusion[0].translate(escape)
 
     @staticmethod
     def append_inclusions(inclusions: dict, group_dict: dict):
