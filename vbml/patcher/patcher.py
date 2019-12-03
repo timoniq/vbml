@@ -1,4 +1,5 @@
 from .pattern import Pattern
+from .loader import Loader
 from inspect import iscoroutinefunction
 from typing import Optional
 import asyncio
@@ -25,6 +26,12 @@ class Patcher(ContextInstanceMixin):
     def pattern(self, text: str, **context):
         context.update(self.pattern_context)
         return Pattern(text, **context)
+
+    def loader(
+        self, arguments_creation_mode: int = 1, use_validators: bool = False, **context
+    ) -> Loader:
+        context.update(self.pattern_context)
+        return Loader(arguments_creation_mode, use_validators, **context)
 
     async def check_async(
         self, text: str, pattern: Pattern, ignore_features: bool = False

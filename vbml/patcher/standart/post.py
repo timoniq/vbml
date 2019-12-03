@@ -11,12 +11,13 @@ def flatten(lis):
             yield item
 
 
-SYNTAX: List[str] = ["*", "^", "#", "$"]
+SYNTAX: List[str] = ["*", "^", "#", "$", "!"]
 UNION: str = "_union"
 UNION_CHAR: str = "*"
 ONE_CHAR_CHAR: str = "^"
 EXCEPT_CHAR: str = "#"
 REGEX_CHAR: str = "$"
+IGNORE_CHAR: str = "!"
 
 escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}"}
 
@@ -61,6 +62,10 @@ class Syntax:
                 "Regex argument expression have to contain not less than one symbol in inclusion"
             )
         return inclusion[arg]
+
+    @staticmethod
+    def ignore_arg(args: list, arg: str, inclusion: dict, **context):
+        return "(?:.*?)"
 
 
 class PostValidation(Syntax):

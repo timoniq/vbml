@@ -1,6 +1,6 @@
 import re
-from .exceptions import PatternError
-from .standart import (
+from ..exceptions import PatternError
+from ..standart import (
     PostValidation,
     AheadValidation,
     SYNTAX,
@@ -8,6 +8,7 @@ from .standart import (
     ONE_CHAR_CHAR,
     EXCEPT_CHAR,
     REGEX_CHAR,
+    IGNORE_CHAR,
 )
 from typing import List, Tuple, Sequence, Optional
 
@@ -33,6 +34,7 @@ class Pattern:
         ONE_CHAR_CHAR: PostValidation.one_char,
         EXCEPT_CHAR: PostValidation.except_of,
         REGEX_CHAR: PostValidation.regex_arg,
+        IGNORE_CHAR: PostValidation.ignore_arg,
     }
 
     def __init__(
@@ -62,6 +64,7 @@ class Pattern:
 
         # Add representation
         self._vbml = re.sub(r"<(.*?)>", context.get("repr_noun", "?"), text)
+        self._text = text
 
         ### Investigate final pattern
         # Set pattern constants
@@ -102,6 +105,8 @@ class Pattern:
         :param text:
         :return:
         """
+        if not text:
+            return
         match = self._compiler.match(text)
         if match is not None:
             self._pregmatch = self._ahead.group(match)
@@ -130,6 +135,10 @@ class Pattern:
     @property
     def nested(self):
         return self._nested
+
+    @property
+    def text(self):
+        return self._text
 
     def set_dict(self, new_dict: dict):
         self._pregmatch = new_dict
