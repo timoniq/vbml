@@ -14,6 +14,7 @@ class AheadValidation:
                 union_name = inc.strip(UNION_CHAR) or UNION
                 groupdict[union_name] = [
                     a for a in groupdict[union_name].split(self._inclusions[inc])
+                    if a
                 ]
         [groupdict.update(self._nested[a](groupdict) or {}) for a in self._nested]
         return groupdict

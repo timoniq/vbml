@@ -42,6 +42,7 @@ class Pattern:
     ):
         text = text or ""
         findall = re.findall
+        self._text = text
 
         # Find all arguments with validators
         typed_arguments = findall(r"(<.*?([a-zA-Z0-9_]+):.*?>)", text)
@@ -56,15 +57,14 @@ class Pattern:
 
         # Get all inclusions from regex
         inclusions: List[Optional[str]] = context.get("inclusions") or [
-            PostValidation.inclusion(inc) for inc in findall("<(.*?)>", text)
+            PostValidation.inclusion(inc) for inc in findall("<(.*?)>", self._text)
         ]
 
         # Delete inclusion from regex
-        text = re.sub(r"<\((?:.*?)\)(.*?)>", r"<\1>", text)
+        text = re.sub(r"<(?:\(.*?\))(.*?)>", r"<\1>", text)
 
         # Add representation
         self._vbml = re.sub(r"<(.*?)>", context.get("repr_noun", "?"), text)
-        self._text = text
 
         ### Investigate final pattern
         # Set pattern constants
@@ -87,11 +87,12 @@ class Pattern:
                     ),
                 )
             else:
+                pre = self.inclusions.get(arg, "")
                 text = text.replace(
                     "<{}>".format(arg),
                     "(?P<{arg}>{pre}.*{lazy})".format(
                         arg=arg,
-                        pre=self.inclusions.get(arg, "") or "",
+                        pre=pre.translate(self.escape),
                         lazy="?" if lazy else "",
                     ),
                 )

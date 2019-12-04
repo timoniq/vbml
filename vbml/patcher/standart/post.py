@@ -38,7 +38,7 @@ class Syntax:
         pattern = "."
         if inclusion.get(arg):
             # inclusions = ["\\" + inc for inc in list(inclusion[arg])]
-            pattern = "[" + inclusion[arg] + "]"
+            pattern = "[" + inclusion[arg].translate(escape) + "]"
 
         return "(?P<" + arg.strip(ONE_CHAR_CHAR) + ">" + pattern + ")"
 
@@ -51,7 +51,7 @@ class Syntax:
         elif not len(arg.strip(EXCEPT_CHAR)):
             raise PatternError("Except expression should be named")
 
-        pattern = "[^" + inclusion[arg] + "]"
+        pattern = "[^" + inclusion[arg].translate(escape) + "]"
 
         return "(?P<{}>{}+)".format(arg.strip(EXCEPT_CHAR), pattern)
 
@@ -116,7 +116,7 @@ class PostValidation(Syntax):
             r"^\((.*?)\)[a-zA-Z0-9_" + "".join(SYNTAX) + "]+[:]?.*?$", argument
         )
         if len(inclusion):
-            return inclusion[0].translate(escape)
+            return inclusion[0]
 
     @staticmethod
     def append_inclusions(inclusions: dict, group_dict: dict):
