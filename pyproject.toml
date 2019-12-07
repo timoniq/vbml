@@ -1,11 +1,12 @@
 [tool.poetry]
 name = "vbml"
-version = "0.1.0"
-description = "A modern parsing library for Python and Humans"
+version = "0.5.0"
+description = "Way to check"
 authors = ["timoniq"]
+license = "GPL-3.0"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
 
 [tool.poetry.dev-dependencies]
 
