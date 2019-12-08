@@ -87,7 +87,7 @@ class Pattern:
                     ),
                 )
             else:
-                pre = self.inclusions.get(arg, "")
+                pre = self.inclusions.get(arg) or ""
                 text = text.replace(
                     "<{}>".format(arg),
                     "(?P<{arg}>{pre}.*{lazy})".format(
