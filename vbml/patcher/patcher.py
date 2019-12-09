@@ -13,10 +13,10 @@ class Patcher(ContextInstanceMixin):
         self,
         disable_validators: bool = False,
         manager: ValidatorManager = None,
-        **pattern_context
+        **pattern_inherit_context
     ):
         self.disable_validators = disable_validators
-        self.pattern_context = pattern_context
+        self.pattern_context = pattern_inherit_context
         self.manager = manager or ValidatorManager.get_current()
         self.set_current(self)
 
@@ -45,14 +45,14 @@ class Patcher(ContextInstanceMixin):
             return pattern(text)
         loop = asyncio.get_event_loop()
         if loop.is_running():
-            raise RuntimeError("Please `check_async` when loop is running.")
+            raise RuntimeError("Please perform `check_async` when loop is running.")
         return loop.run_until_complete(self._check(text, pattern))
 
     async def _check(
         self, text: str, pattern: Pattern, ignore_validation: bool = False
     ):
         if self.manager is None:
-            raise RuntimeError("Configure `ValidatorManager` for work with Patcher.")
+            raise RuntimeError("Configure `ValidatorManager` to work with Patcher.")
 
         check = pattern(text)
 
