@@ -101,7 +101,7 @@ class PostValidation(Syntax):
                             [
                                 a.split(",")
                                 for a in re.findall(
-                                    ":" + validator + r"\\\[(.+)+\\\]", p[0]
+                                    ":" + validator + r"\[(.+)+\]", p[0]
                                 )
                             ]
                         )
