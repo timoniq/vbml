@@ -151,7 +151,7 @@ class Pattern:
         self._pregmatch = None
 
     def context_copy(self, **context) -> "Pattern":
-        return Pattern(self._text, self._pattern, self._lazy, **context)
+        return Pattern(**{**context, "text": self.text, "pattern": self._pattern, "lazy": self._lazy})
 
     def dict(self):
         if self._pregmatch is None:
