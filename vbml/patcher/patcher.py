@@ -2,6 +2,7 @@ from .pattern import Pattern
 from .loader import Loader
 from inspect import iscoroutinefunction
 from typing import Optional
+import typing
 import asyncio
 from ..validators import ValidatorManager
 from .standart import PatchedValidators
@@ -23,9 +24,11 @@ class Patcher(ContextInstanceMixin):
     def add_manager(self, manager: ValidatorManager) -> None:
         self.manager = manager
 
-    def pattern(self, text: str, **context):
+    def pattern(self, pattern: typing.Union[str, Pattern], **context):
         context.update(self.pattern_context)
-        return Pattern(text, **context)
+        if isinstance(pattern, Pattern):
+            return pattern.context_copy(**context)
+        return Pattern(pattern, **context)
 
     def loader(
         self, arguments_creation_mode: int = 1, use_validators: bool = False, **context

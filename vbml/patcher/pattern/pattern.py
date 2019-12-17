@@ -43,6 +43,8 @@ class Pattern:
         text = text or ""
         findall = re.findall
         self._text = text
+        self._pattern = pattern
+        self._lazy = lazy
 
         # Find all arguments with validators
         typed_arguments = findall(r"(<.*?([a-zA-Z0-9_]+):.*?>)", text)
@@ -147,6 +149,9 @@ class Pattern:
 
     def remove_dict(self):
         self._pregmatch = None
+
+    def context_copy(self, **context) -> "Pattern":
+        return Pattern(self._text, self._pattern, self._lazy, **context)
 
     def dict(self):
         if self._pregmatch is None:
