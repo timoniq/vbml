@@ -24,11 +24,11 @@ class Patcher(ContextInstanceMixin):
     def add_manager(self, manager: ValidatorManager) -> None:
         self.manager = manager
 
-    def pattern(self, pattern: typing.Union[str, Pattern], **context):
+    def pattern(self, _pattern: typing.Union[str, Pattern], **context):
         context.update(self.pattern_context)
-        if isinstance(pattern, Pattern):
-            return pattern.context_copy(**context)
-        return Pattern(pattern, **context)
+        if isinstance(_pattern, Pattern):
+            return _pattern.context_copy(**context)
+        return Pattern(_pattern, **context)
 
     def loader(
         self, arguments_creation_mode: int = 1, use_validators: bool = False, **context
