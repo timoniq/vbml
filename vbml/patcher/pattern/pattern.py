@@ -45,9 +45,11 @@ class Pattern:
         self._text = text
         self._pattern = pattern
         self._lazy = lazy
+        if context.get("flags") is None:
+            context["flags"] = re.DOTALL
 
         # Find all arguments with validators
-        typed_arguments = findall(r"(<.*?([a-zA-Z0-9_]+):.*?>)", text)
+        typed_arguments = findall(r"(<.*?([a-zA-Z0-9_]+):.*?>)", text, flags=re.MULTILINE)
 
         # Save validators. Parse arguments
         self._validation, self._nested = PostValidation.get_validators(
@@ -55,18 +57,17 @@ class Pattern:
         )
 
         # Delete arguments from regex
-        text = re.sub(r"<(.*?)(?::[\[\]a-zA-Z_0-9, ]+)*>", r"<\1>", text)
-
+        text = re.sub(r"<(.*?)(?::[\[\]a-zA-Z_0-9, ]+)*>", r"<\1>", text, flags=re.MULTILINE)
         # Get all inclusions from regex
         inclusions: List[Optional[str]] = context.get("inclusions") or [
-            PostValidation.inclusion(inc) for inc in findall("<(.*?)>", self._text)
+            PostValidation.inclusion(inc) for inc in findall(r"<(.*?)>", self._text)
         ]
 
         # Delete inclusion from regex
-        text = re.sub(r"<(?:\(.*?\))(.*?)>", r"<\1>", text)
+        text = re.sub(r"<(?:\(.*?\))(.*?)>", r"<\1>", text, flags=re.MULTILINE)
 
         # Add representation
-        self._vbml = re.sub(r"<(.*?)>", context.get("repr_noun", "?"), text)
+        self._vbml = re.sub(r"<(.*?)>", context.get("repr_noun", "?"), text, flags=re.MULTILINE)
 
         ### Investigate final pattern
         # Set pattern constants

@@ -116,6 +116,8 @@ class PostValidation(Syntax):
             r"^\((.*?)\)[a-zA-Z0-9_" + "".join(SYNTAX) + "]+[:]?.*?$", argument
         )
         if len(inclusion):
+            if inclusion[0] == "\\n":
+                inclusion[0] = "\n"
             return inclusion[0]
 
     @staticmethod
