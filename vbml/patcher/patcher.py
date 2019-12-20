@@ -58,9 +58,8 @@ class Patcher(ContextInstanceMixin):
                 break
             if key in pattern.validation:
                 for validator in pattern.validation[key]:
-
-                    validator = self.validators._find_validator(validator)
-                    if validator is None:
+                    validator_obj = self.validators._find_validator(validator)
+                    if validator_obj is None:
                         raise ValueError(f"Unknown validator: {validator}")
 
                     args = pattern.validation[key][validator] or []
