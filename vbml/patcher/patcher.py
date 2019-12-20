@@ -10,10 +10,10 @@ from ..utils import ContextInstanceMixin
 
 class Patcher(ContextInstanceMixin):
     def __init__(
-        self,
-        disable_validators: bool = False,
-        validators: typing.Type[PatchedValidators] = None,
-        **pattern_inherit_context
+            self,
+            disable_validators: bool = False,
+            validators: typing.Type[PatchedValidators] = None,
+            **pattern_inherit_context
     ):
         self.disable_validators = disable_validators
         self.pattern_context = pattern_inherit_context
@@ -27,29 +27,16 @@ class Patcher(ContextInstanceMixin):
         return Pattern(_pattern, **context)
 
     def loader(
-        self, arguments_creation_mode: int = 1, use_validators: bool = False, **context
+            self, arguments_creation_mode: int = 1, use_validators: bool = False, **context
     ) -> Loader:
         context.update(self.pattern_context)
         return Loader(arguments_creation_mode, use_validators, **context)
 
-    async def check_async(
-        self, text: str, pattern: Pattern, ignore_features: bool = False
+    def check(
+            self, text: str, pattern: Pattern, ignore_validation: bool = False, ignore_features: bool = False,
     ):
         if ignore_features:
             return pattern(text)
-        return await self._check(text, pattern)
-
-    def check(self, text: str, pattern: Pattern, ignore_features: bool = False):
-        if ignore_features:
-            return pattern(text)
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            raise RuntimeError("Please perform `check_async` when loop is running.")
-        return loop.run_until_complete(self._check(text, pattern))
-
-    async def _check(
-        self, text: str, pattern: Pattern, ignore_validation: bool = False
-    ):
 
         check = pattern(text)
 
@@ -77,7 +64,7 @@ class Patcher(ContextInstanceMixin):
                         raise ValueError(f"Unknown validator: {validator}")
 
                     args = pattern.validation[key][validator] or []
-                    valid = await self.validators._find_validator(validator)(keys[key], *args)
+                    valid = self.validators._find_validator(validator)(keys[key], *args)
 
                     if valid is None:
                         valid_keys = None
