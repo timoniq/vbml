@@ -4,7 +4,6 @@ from inspect import iscoroutinefunction
 from typing import Optional
 import typing
 import asyncio
-from ..validators import ValidatorManager
 from .standart import PatchedValidators
 from ..utils import ContextInstanceMixin
 
@@ -13,16 +12,13 @@ class Patcher(ContextInstanceMixin):
     def __init__(
         self,
         disable_validators: bool = False,
-        manager: ValidatorManager = None,
+        validators: typing.Type[PatchedValidators] = None,
         **pattern_inherit_context
     ):
         self.disable_validators = disable_validators
         self.pattern_context = pattern_inherit_context
-        self.manager = manager or ValidatorManager.get_current()
+        self.validators = validators() or PatchedValidators()
         self.set_current(self)
-
-    def add_manager(self, manager: ValidatorManager) -> None:
-        self.manager = manager
 
     def pattern(self, _pattern: typing.Union[str, Pattern], **context):
         context.update(self.pattern_context)
@@ -54,8 +50,6 @@ class Patcher(ContextInstanceMixin):
     async def _check(
         self, text: str, pattern: Pattern, ignore_validation: bool = False
     ):
-        if self.manager is None:
-            raise RuntimeError("Configure `ValidatorManager` to work with Patcher.")
 
         check = pattern(text)
 
@@ -78,7 +72,7 @@ class Patcher(ContextInstanceMixin):
             if key in pattern.validation:
                 for validator in pattern.validation[key]:
 
-                    validator_class = self.manager.get_validator(validator)
+                    validator_class = self.validators._find_validator(validator)
                     args = pattern.validation[key][validator] or []
 
                     if self.manager.patched is None:

@@ -2,8 +2,8 @@ from urllib import parse
 
 
 class PatchedValidators:
-    def __init__(self):
-        pass
+    def _find_validator(self, key: str):
+        return getattr(self, key, None)
 
     async def int(self, value: str):
         if value.isdigit():
