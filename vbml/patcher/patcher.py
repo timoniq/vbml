@@ -17,7 +17,7 @@ class Patcher(ContextInstanceMixin):
     ):
         self.disable_validators = disable_validators
         self.pattern_context = pattern_inherit_context
-        self.validators = validators() or PatchedValidators()
+        self.validators = validators() if validators else PatchedValidators()
         self.set_current(self)
 
     def pattern(self, _pattern: typing.Union[str, Pattern], **context):
@@ -72,16 +72,12 @@ class Patcher(ContextInstanceMixin):
             if key in pattern.validation:
                 for validator in pattern.validation[key]:
 
-                    validator_class = self.validators._find_validator(validator)
-                    args = pattern.validation[key][validator] or []
+                    validator = self.validators._find_validator(validator)
+                    if validator is None:
+                        raise ValueError(f"Unknown validator: {validator}")
 
-                    if self.manager.patched is None:
-                        if iscoroutinefunction(validator_class.check):
-                            valid = await validator_class(keys[key], *args)
-                        else:
-                            valid = validator_class(keys[key], *args)
-                    else:
-                        valid = await self.manager.patched[validator](keys[key], *args)
+                    args = pattern.validation[key][validator] or []
+                    valid = await self.validators._find_validator(validator)(keys[key], *args)
 
                     if valid is None:
                         valid_keys = None

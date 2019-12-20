@@ -5,24 +5,24 @@ class PatchedValidators:
     def _find_validator(self, key: str):
         return getattr(self, key, None)
 
-    async def int(self, value: str):
+    def int(self, value: str):
         if value.isdigit():
             return int(value)
         return
 
-    async def float(self, value: str):
+    def float(self, value: str):
         try:
             return float(value)
         except ValueError:
             return
 
-    async def url(self, value: str):
+    def url(self, value: str):
         scheme = parse.urlparse(value)
         if scheme.netloc != "":
             return value
         return
 
-    async def validator(self, value: str, *args):
+    def validator(self, value: str, *args):
         print(
             "Value {} was validated by default validator! Hold on.\nReceived args: {}".format(
                 value, args
