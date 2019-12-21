@@ -8,8 +8,8 @@
 
 ### Features
 
-* Fast and asynchronous parser
-* Abstract validators support
+* Fast parser based on `regex`
+* Validation support
 * Easy and intellectually clear parser:
 
 ### `I am <name>`
@@ -20,19 +20,9 @@
 To install use this command:
 
 ```shell
-pip install https://github.com/timoniq/vbml/archive/master.zip --upgrade
-```
-or:  
-
-```shell
 pip install vbml
 ```
 
-To add this project to your project requirements:
-
-* add string `vbml` to your requirements file
-
-* add element `vbml` to your install_requires list
 
 ### Documentation
 
@@ -42,39 +32,30 @@ Simple usage example:
 
 ```python
 from vbml import Patcher
-from vbml.validators import ValidatorManager, AbstractAsynchronousValidator
+from vbml import PatchedValidators
 
 
-class MyValidator(AbstractAsynchronousValidator):
- key = "int"
+class Validators(PatchedValidators):
 
- async def check(self, text: str, *args):
+ async def int(self, text: str, *args):
      valid = text.isdigit()
      if valid:
          return int(text)
 
 
-# Init your VBML main processor
-manager = ValidatorManager([MyValidator()])
-
-patcher = Patcher()
+patcher = Patcher(validators=Validators)
 # Create a pattern
 pattern = patcher.pattern("i am <name> and i love <item>")
 # Mind about text sample
 text = "i am vasya and i love ice cream"
 text2 = "amm.. some text"
 
+print(patcher.check(text, pattern))
+# >> {'name': 'vasya', 'item': 'ice cream'}
 
-def main():
-    # Go
-    print(patcher.check(text, pattern))
-    # >> {'name': 'vasya', 'item': 'ice cream'}
+print(patcher.check(text2, pattern))
+# >> None
 
-    print(patcher.check(text2, pattern))
-    # >> None
-
-
-main()
 ```
 
 UPD: Documentation was copied into [/docs folder](/docs)
