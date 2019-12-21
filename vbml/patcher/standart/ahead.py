@@ -12,7 +12,6 @@ class AheadValidation:
 
     def group(self, match) -> typing.Union[dict, typing.NoReturn]:
         groupdict: dict = match.groupdict()
-        print("ahead")
         for inc in self._inclusions:
             if inc[0] == UNION_CHAR:
                 union_name = inc.strip(UNION_CHAR) or UNION
@@ -20,15 +19,11 @@ class AheadValidation:
                     a for a in groupdict[union_name].split(self._inclusions[inc]) if a
                 ]
             elif inc[0] == RECURSION_CHAR:
-                print(self._inclusions, groupdict, inc)
-                name = inc
-                print(groupdict[name.strip(RECURSION_CHAR)])
-                recursion: RecursionArgument = self._recursions[name]
+                name = inc.strip(RECURSION_CHAR)
+                recursion: RecursionArgument = self._recursions[inc]
                 pattern = self.pattern(**recursion.pattern)
-                print(pattern.pattern)
-                print(pattern(groupdict[name.strip(RECURSION_CHAR)]))
-                if pattern(groupdict[name.strip(RECURSION_CHAR)]):
-                    groupdict[name] = {name: pattern.dict()}
+                if pattern(groupdict[name]):
+                    groupdict.update({name: pattern.dict()})
                 else:
                     return
         [groupdict.update(self._nested[a](groupdict) or {}) for a in self._nested]

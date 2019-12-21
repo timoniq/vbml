@@ -75,7 +75,7 @@ class Pattern:
 
         ### Investigate final pattern
         # Set pattern constants
-        self._arguments: list = findall("<(.*)>", text)
+        self._arguments: list = findall("<(.*?)>", text)
         self._inclusions: dict = dict(zip(self.arguments, inclusions))
         self._recursions = dict()
 
