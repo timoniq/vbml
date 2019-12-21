@@ -1,5 +1,6 @@
 from typing import List, Tuple, Sequence, Optional, Callable
 from ..exceptions import PatternError
+from ..recursion import RecursionArgument
 import re
 
 
@@ -11,15 +12,16 @@ def flatten(lis):
             yield item
 
 
-SYNTAX: List[str] = ["*", "^", "#", "$", "!"]
+SYNTAX: List[str] = ["*", "^", "#", "$", "!", "&"]
 UNION: str = "_union"
 UNION_CHAR: str = "*"
 ONE_CHAR_CHAR: str = "^"
 EXCEPT_CHAR: str = "#"
 REGEX_CHAR: str = "$"
 IGNORE_CHAR: str = "!"
+RECURSION_CHAR: str = "&"
 
-escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}"}
+escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}&"}
 
 
 class Syntax:
@@ -64,8 +66,21 @@ class Syntax:
         return inclusion[arg]
 
     @staticmethod
-    def ignore_arg(args: list, arg: str, inclusion: dict, **context):
+    def ignore_arg(*a, **k):
         return "(?:.*?)"
+
+    @staticmethod
+    def recursion_arg(args: list, arg: str, *a, **k):
+        return "(?P<" + arg.strip(RECURSION_CHAR) + ">" + ".*" + ")"
+
+    @staticmethod
+    def recursion(args: list, arg: str, inclusion: dict, **context):
+        if not inclusion.get(arg):
+            raise PatternError(
+                "Recursion argument should maintain inclusion in \"\""
+            )
+        recursion = RecursionArgument(inclusion[arg], **context)
+        return {arg: recursion}
 
 
 class PostValidation(Syntax):
