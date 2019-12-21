@@ -37,9 +37,9 @@ from vbml import PatchedValidators
 
 class Validators(PatchedValidators):
 
- async def int(self, text: str, *args):
-     valid = text.isdigit()
-     if valid:
+    def int(self, text: str, *args):
+        valid = text.isdigit()
+        if valid:
          return int(text)
 
 
