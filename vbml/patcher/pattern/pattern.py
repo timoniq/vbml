@@ -9,8 +9,9 @@ from ..standart import (
     EXCEPT_CHAR,
     REGEX_CHAR,
     IGNORE_CHAR,
+    RECURSION_CHAR
 )
-from typing import List, Tuple, Sequence, Optional
+from typing import List, Sequence, Optional
 
 
 def flatten(lis):
@@ -27,7 +28,7 @@ ARG_SUFFIX = ">"
 
 class Pattern:
     # Make whole text re-invisible
-    escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}:"}
+    escape = {ord(x): "\\" + x for x in r"\.*+?()[]|^${}:&"}
     syntax = SYNTAX
     syntax_proc = {
         UNION_CHAR: PostValidation.union,
@@ -35,6 +36,7 @@ class Pattern:
         EXCEPT_CHAR: PostValidation.except_of,
         REGEX_CHAR: PostValidation.regex_arg,
         IGNORE_CHAR: PostValidation.ignore_arg,
+        RECURSION_CHAR: PostValidation.recursion_arg
     }
 
     def __init__(
@@ -57,14 +59,16 @@ class Pattern:
         )
 
         # Delete arguments from regex
-        text = re.sub(r"<(.*?)(?::[\[\]a-zA-Z_0-9, ]+)*>", r"<\1>", text, flags=re.MULTILINE)
-        # Get all inclusions from regex
-        inclusions: List[Optional[str]] = context.get("inclusions") or [
-            PostValidation.inclusion(inc) for inc in findall(r"<(.*?)>", self._text)
-        ]
+        text = re.sub(r"<(.*?)(?::[\[\]a-zA-Z_0-9, ]+)+>", r"<\1>", text, flags=re.MULTILINE)
 
         # Delete inclusion from regex
-        text = re.sub(r"<(?:\(.*?\))(.*?)>", r"<\1>", text, flags=re.MULTILINE)
+        text, old = re.sub(r"<(?:\(.*?\))(.*?)>", r"<\1>", text,
+                           flags=re.MULTILINE), text
+
+        # Get all inclusions from regex
+        inclusions: List[Optional[str]] = context.get("inclusions") or [
+            PostValidation.inclusion(inc) for inc in findall(r"<(.*)>", old)
+        ]
 
         # Add representation
         self._vbml = re.sub(r"<(.*?)>", context.get("repr_noun", "?"), text, flags=re.MULTILINE)
@@ -73,7 +77,7 @@ class Pattern:
         # Set pattern constants
         self._arguments: list = findall("<(.*?)>", text)
         self._inclusions: dict = dict(zip(self.arguments, inclusions))
-        self._ahead = AheadValidation(self.inclusions, self.nested)
+        self._recursions = dict()
 
         # Remove regex-incompatible symbols
         text = text.translate(self.escape)
@@ -82,7 +86,9 @@ class Pattern:
         for arg in self.arguments:
             if arg == "":
                 raise PatternError("Argument can't be empty")
-            if arg[0] in self.syntax:
+            if arg[0] == RECURSION_CHAR:
+                self._recursions.update(PostValidation.recursion(self.arguments, arg, self.inclusions, **context))
+            if arg[0] in self.syntax_proc:
                 text = text.replace(
                     "<{}>".format(arg.translate(self.escape)),
                     self.syntax_proc[arg[0]](
@@ -100,6 +106,7 @@ class Pattern:
                     ),
                 )
 
+        self._ahead = AheadValidation(Pattern, self.inclusions, self.nested, self.recursions)
         self._compiler = re.compile(pattern.format(text), flags=context.get("flags", 0))
         self._pregmatch: Optional[dict] = None
 
@@ -114,7 +121,8 @@ class Pattern:
         match = self._compiler.match(text)
         if match is not None:
             self._pregmatch = self._ahead.group(match)
-            return True
+            if self._pregmatch is not None:
+                return True
 
     @property
     def pattern(self):
@@ -131,6 +139,10 @@ class Pattern:
     @property
     def inclusions(self):
         return self._inclusions
+
+    @property
+    def recursions(self):
+        return self._recursions
 
     @property
     def representation(self):
