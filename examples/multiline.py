@@ -1,8 +1,5 @@
 from vbml import Pattern, Patcher
-from vbml.validators import ValidatorManager
 
-# Assign manager and patcher
-manager = ValidatorManager()
 patcher = Patcher()
 
 # Create a pattern

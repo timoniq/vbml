@@ -4,25 +4,21 @@ from inspect import iscoroutinefunction
 from typing import Optional
 import typing
 import asyncio
-from ..validators import ValidatorManager
 from .standart import PatchedValidators
 from ..utils import ContextInstanceMixin
 
 
 class Patcher(ContextInstanceMixin):
     def __init__(
-        self,
-        disable_validators: bool = False,
-        manager: ValidatorManager = None,
-        **pattern_inherit_context
+            self,
+            disable_validators: bool = False,
+            validators: typing.Type[PatchedValidators] = None,
+            **pattern_inherit_context
     ):
         self.disable_validators = disable_validators
         self.pattern_context = pattern_inherit_context
-        self.manager = manager or ValidatorManager.get_current()
+        self.validators = validators() if validators else PatchedValidators()
         self.set_current(self)
-
-    def add_manager(self, manager: ValidatorManager) -> None:
-        self.manager = manager
 
     def pattern(self, _pattern: typing.Union[str, Pattern], **context):
         context.update(self.pattern_context)
@@ -31,31 +27,16 @@ class Patcher(ContextInstanceMixin):
         return Pattern(_pattern, **context)
 
     def loader(
-        self, arguments_creation_mode: int = 1, use_validators: bool = False, **context
+            self, arguments_creation_mode: int = 1, use_validators: bool = False, **context
     ) -> Loader:
         context.update(self.pattern_context)
         return Loader(arguments_creation_mode, use_validators, **context)
 
-    async def check_async(
-        self, text: str, pattern: Pattern, ignore_features: bool = False
+    def check(
+            self, text: str, pattern: Pattern, ignore_validation: bool = False, ignore_features: bool = False,
     ):
         if ignore_features:
             return pattern(text)
-        return await self._check(text, pattern)
-
-    def check(self, text: str, pattern: Pattern, ignore_features: bool = False):
-        if ignore_features:
-            return pattern(text)
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            raise RuntimeError("Please perform `check_async` when loop is running.")
-        return loop.run_until_complete(self._check(text, pattern))
-
-    async def _check(
-        self, text: str, pattern: Pattern, ignore_validation: bool = False
-    ):
-        if self.manager is None:
-            raise RuntimeError("Configure `ValidatorManager` to work with Patcher.")
 
         check = pattern(text)
 
@@ -77,17 +58,12 @@ class Patcher(ContextInstanceMixin):
                 break
             if key in pattern.validation:
                 for validator in pattern.validation[key]:
+                    validator_obj = self.validators._find_validator(validator)
+                    if validator_obj is None:
+                        raise ValueError(f"Unknown validator: {validator}")
 
-                    validator_class = self.manager.get_validator(validator)
                     args = pattern.validation[key][validator] or []
-
-                    if self.manager.patched is None:
-                        if iscoroutinefunction(validator_class.check):
-                            valid = await validator_class(keys[key], *args)
-                        else:
-                            valid = validator_class(keys[key], *args)
-                    else:
-                        valid = await self.manager.patched[validator](keys[key], *args)
+                    valid = self.validators._find_validator(validator)(keys[key], *args)
 
                     if valid is None:
                         valid_keys = None
