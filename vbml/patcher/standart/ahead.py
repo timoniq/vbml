@@ -2,13 +2,16 @@ import typing
 from .post import UNION, UNION_CHAR, RECURSION_CHAR
 from ..recursion import RecursionArgument
 
+if typing.TYPE_CHECKING:
+    from ..pattern import Pattern
+
 
 class AheadValidation:
-    def __init__(self, pattern, inclusions: dict, nested: dict, recursions: dict):
+    def __init__(self, pattern: "Pattern", inclusions: dict, nested: dict, recursions: dict):
         self._inclusions = inclusions
         self._nested = nested
         self._recursions = recursions
-        self.pattern = pattern
+        self.pattern: "Pattern" = pattern
 
     def group(self, match) -> typing.Union[dict, typing.NoReturn]:
         groupdict: dict = match.groupdict()
