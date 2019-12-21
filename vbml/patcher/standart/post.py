@@ -76,9 +76,7 @@ class Syntax:
     @staticmethod
     def recursion(args: list, arg: str, inclusion: dict, **context):
         if not inclusion.get(arg):
-            raise PatternError(
-                "Recursion argument should maintain inclusion in \"\""
-            )
+            raise PatternError('Recursion argument should maintain inclusion in ""')
         recursion = RecursionArgument(inclusion[arg], **context)
         return {arg: recursion}
 

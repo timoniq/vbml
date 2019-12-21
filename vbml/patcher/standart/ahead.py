@@ -7,7 +7,9 @@ if typing.TYPE_CHECKING:
 
 
 class AheadValidation:
-    def __init__(self, pattern: "Pattern", inclusions: dict, nested: dict, recursions: dict):
+    def __init__(
+        self, pattern: "Pattern", inclusions: dict, nested: dict, recursions: dict
+    ):
         self._inclusions = inclusions
         self._nested = nested
         self._recursions = recursions

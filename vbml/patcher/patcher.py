@@ -10,10 +10,10 @@ from ..utils import ContextInstanceMixin
 
 class Patcher(ContextInstanceMixin):
     def __init__(
-            self,
-            disable_validators: bool = False,
-            validators: typing.Type[PatchedValidators] = None,
-            **pattern_inherit_context
+        self,
+        disable_validators: bool = False,
+        validators: typing.Type[PatchedValidators] = None,
+        **pattern_inherit_context,
     ):
         self.disable_validators = disable_validators
         self.pattern_context = pattern_inherit_context
@@ -27,13 +27,17 @@ class Patcher(ContextInstanceMixin):
         return Pattern(_pattern, **context)
 
     def loader(
-            self, arguments_creation_mode: int = 1, use_validators: bool = False, **context
+        self, arguments_creation_mode: int = 1, use_validators: bool = False, **context
     ) -> Loader:
         context.update(self.pattern_context)
         return Loader(arguments_creation_mode, use_validators, **context)
 
     def check(
-            self, text: str, pattern: Pattern, ignore_validation: bool = False, ignore_features: bool = False,
+        self,
+        text: str,
+        pattern: Pattern,
+        ignore_validation: bool = False,
+        ignore_features: bool = False,
     ):
         if ignore_features:
             return pattern(text)

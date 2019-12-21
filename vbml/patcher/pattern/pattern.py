@@ -9,7 +9,7 @@ from ..standart import (
     EXCEPT_CHAR,
     REGEX_CHAR,
     IGNORE_CHAR,
-    RECURSION_CHAR
+    RECURSION_CHAR,
 )
 from typing import List, Sequence, Optional
 
@@ -36,7 +36,7 @@ class Pattern:
         EXCEPT_CHAR: PostValidation.except_of,
         REGEX_CHAR: PostValidation.regex_arg,
         IGNORE_CHAR: PostValidation.ignore_arg,
-        RECURSION_CHAR: PostValidation.recursion_arg
+        RECURSION_CHAR: PostValidation.recursion_arg,
     }
 
     def __init__(
@@ -51,7 +51,9 @@ class Pattern:
             context["flags"] = re.DOTALL
 
         # Find all arguments with validators
-        typed_arguments = findall(r"(<.*?([a-zA-Z0-9_]+):.*?>)", text, flags=re.MULTILINE)
+        typed_arguments = findall(
+            r"(<.*?([a-zA-Z0-9_]+):.*?>)", text, flags=re.MULTILINE
+        )
 
         # Save validators. Parse arguments
         self._validation, self._nested = PostValidation.get_validators(
@@ -59,11 +61,15 @@ class Pattern:
         )
 
         # Delete arguments from regex
-        text = re.sub(r"<(.*?)(?::[\[\]a-zA-Z_0-9, ]+)+>", r"<\1>", text, flags=re.MULTILINE)
+        text = re.sub(
+            r"<(.*?)(?::[\[\]a-zA-Z_0-9, ]+)+>", r"<\1>", text, flags=re.MULTILINE
+        )
 
         # Delete inclusion from regex
-        text, old = re.sub(r"<(?:\(.*?\))(.*?)>", r"<\1>", text,
-                           flags=re.MULTILINE), text
+        text, old = (
+            re.sub(r"<(?:\(.*?\))(.*?)>", r"<\1>", text, flags=re.MULTILINE),
+            text,
+        )
 
         # Get all inclusions from regex
         inclusions: List[Optional[str]] = context.get("inclusions") or [
@@ -71,7 +77,9 @@ class Pattern:
         ]
 
         # Add representation
-        self._vbml = re.sub(r"<(.*?)>", context.get("repr_noun", "?"), text, flags=re.MULTILINE)
+        self._vbml = re.sub(
+            r"<(.*?)>", context.get("repr_noun", "?"), text, flags=re.MULTILINE
+        )
 
         ### Investigate final pattern
         # Set pattern constants
@@ -87,7 +95,11 @@ class Pattern:
             if arg == "":
                 raise PatternError("Argument can't be empty")
             if arg[0] == RECURSION_CHAR:
-                self._recursions.update(PostValidation.recursion(self.arguments, arg, self.inclusions, **context))
+                self._recursions.update(
+                    PostValidation.recursion(
+                        self.arguments, arg, self.inclusions, **context
+                    )
+                )
             if arg[0] in self.syntax_proc:
                 text = text.replace(
                     "<{}>".format(arg.translate(self.escape)),
@@ -106,7 +118,9 @@ class Pattern:
                     ),
                 )
 
-        self._ahead = AheadValidation(Pattern, self.inclusions, self.nested, self.recursions)
+        self._ahead = AheadValidation(
+            Pattern, self.inclusions, self.nested, self.recursions
+        )
         self._compiler = re.compile(pattern.format(text), flags=context.get("flags", 0))
         self._pregmatch: Optional[dict] = None
 
@@ -164,7 +178,14 @@ class Pattern:
         self._pregmatch = None
 
     def context_copy(self, **context) -> "Pattern":
-        return Pattern(**{**context, "text": self.text, "pattern": self._pattern, "lazy": self._lazy})
+        return Pattern(
+            **{
+                **context,
+                "text": self.text,
+                "pattern": self._pattern,
+                "lazy": self._lazy,
+            }
+        )
 
     def dict(self):
         if self._pregmatch is None:
