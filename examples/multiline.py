@@ -14,5 +14,5 @@ wo are you?
 amm"""
 
 # Match pattern and text, print result
-res = patcher.check(text, pattern)
-print(res)  # {'statements': ['i like ice cream', 'i am dummy', 'wo are you?', 'amm']}
+-res = patcher.check(text, pattern)
+-print(res)  # {'statements': ['i like ice cream', 'i am dummy', 'wo are you?', 'amm']}
