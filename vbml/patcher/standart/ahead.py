@@ -15,7 +15,7 @@ class AheadValidation:
         self._recursions = recursions
         self.pattern: "Pattern" = pattern
 
-    def group(self, match) -> typing.Union[dict, typing.NoReturn]:
+    def group(self, match) -> typing.Union[dict, None]:
         groupdict: dict = match.groupdict()
         for inc in self._inclusions:
             if inc[0] == UNION_CHAR:
