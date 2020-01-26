@@ -51,9 +51,20 @@ class Pattern:
             context["flags"] = re.DOTALL
 
         # Find all arguments with validators
-        typed_arguments = findall(
-            r"(<.*?([a-zA-Z0-9_]+):.*?>)", text, flags=re.MULTILINE
-        )
+        if context.get("default_validators") is not None:
+            typed_arguments = [
+                (
+                    a[0][0:-1] + ":" + ":".join(context["default_validators"]) + ">",
+                    a[1]
+                )
+                for a in findall(
+                    r"(<(.*?)>)", text, flags=re.MULTILINE
+                )
+            ]
+        else:
+            typed_arguments = findall(
+                r"(<.*?([a-zA-Z0-9_]+):.*?>)", text, flags=re.MULTILINE
+            )
 
         # Save validators. Parse arguments
         self._validation, self._nested = PostValidation.get_validators(

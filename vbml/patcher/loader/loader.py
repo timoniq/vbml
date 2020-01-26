@@ -25,7 +25,7 @@ class Loader:
         self.context: dict = context
         self.acm = arguments_creation_mode
 
-    def merge(self, *items: str) -> typing.Union[Pattern, typing.NoReturn]:
+    def merge(self, *items: str) -> typing.Union[Pattern, None]:
         """
         Load items as matches and merge it to pattern
         :param items: Strings to merge
