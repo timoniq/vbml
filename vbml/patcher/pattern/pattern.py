@@ -92,7 +92,7 @@ class Pattern:
             r"<(.*?)>", context.get("repr_noun", "?"), text, flags=re.MULTILINE
         )
 
-        ### Investigate final pattern
+        # Investigate final pattern
         # Set pattern constants
         self._arguments: list = findall("<(.*?)>", text)
         self._inclusions: dict = dict(zip(self.arguments, inclusions))
