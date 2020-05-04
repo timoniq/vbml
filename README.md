@@ -28,36 +28,41 @@ pip install vbml
 
 You can find full documentation at [wiki pages](https://github.com/timoniq/vbml/wiki/VBML-Usage)
 
-Simple usage example:
+Make validators:
 
 ```python
-from vbml import Patcher
 from vbml import PatchedValidators
 
 
 class Validators(PatchedValidators):
-
     def int(self, text: str, *args):
         valid = text.isdigit()
         if valid:
          return int(text)
-
-
-patcher = Patcher(validators=Validators)
-# Create a pattern
-pattern = patcher.pattern("i am <name> and i love <item>")
-# Mind about text sample
-text = "i am vasya and i love ice cream"
-text2 = "amm.. some text"
-
-print(patcher.check(text, pattern))
-# >> {'name': 'vasya', 'item': 'ice cream'}
-
-print(patcher.check(text2, pattern))
-# >> None
-
 ```
 
-UPD: Documentation was copied into [/docs folder](/docs)
+Init patcher and make a simple pattern:
+
+```python
+from vbml import Patcher
+
+patcher = Patcher(validators=Validators)
+pattern = patcher.pattern("i am <name> and i love <item>")
+
+compared_text = "i am vasya and i love ice cream"
+wrong_text = "amm.. some text"
+```
+
+Match texts:
+
+```python
+>> patcher.check(compared_text, pattern)
+{'name': 'vasya', 'item': 'ice cream'}
+
+>> patcher.check(wrong_text, pattern)
+None
+```
+
+Documentation was copied into [/docs folder](/docs)
 
 Made with :heart: love by [timoniq](https://github.com/timoniq)
