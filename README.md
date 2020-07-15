@@ -8,7 +8,7 @@
 
 Pattern `I am <name>` + Text `I am VBML` = `{"name": "VBML"}`
 
-### Installation
+## Installation
 
 Install with pip:
 
@@ -17,7 +17,7 @@ pip install vbml
 ```
 
 
-### Documentation
+## Documentation
 
 You can find full documentation [here](/docs)
 
