@@ -1,3 +1,7 @@
+**timoniq/vbml** is abandoned. Use [tesserdecade/vbml](https://github.com/tesseradecade/vbml) instead
+
+<hr>
+
 # vbml - beautiful parser :sparkles:
 
 ## Features
